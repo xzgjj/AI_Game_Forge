@@ -74,6 +74,11 @@
 - **Tauri CLI**: `cargo install tauri-cli`
 - **Git**: 版本控制
 
+npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
+$env:Path="$env:USERPROFILE\.cargo\bin;$env:Path"; cargo run --no-default-feature
+
+
+
 
 
 ### 安装与运行
