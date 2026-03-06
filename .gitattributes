@@ -1,0 +1,157 @@
+# 自动检测文本文件并规范化行尾
+* text=auto
+
+# 始终将以下文件视为文本文件
+*.rs text
+*.toml text
+*.json text
+*.yml text
+*.yaml text
+*.md text
+*.txt text
+*.html text
+*.css text
+*.js text
+*.ts text
+*.jsx text
+*.tsx text
+*.svelte text
+*.vue text
+*.xml text
+*.svg text
+*.sh text
+*.bat text
+*.cmd text
+
+# 始终将以下文件视为二进制文件
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.pdb binary
+
+# Rust文件特定设置
+*.rs linguist-language=Rust
+*.rs diff=rust
+
+# TypeScript/JavaScript文件特定设置
+*.ts linguist-language=TypeScript
+*.js linguist-language=JavaScript
+*.tsx linguist-language=TypeScript
+*.jsx linguist-language=JavaScript
+
+# Svelte文件特定设置
+*.svelte linguist-language=Svelte
+
+# 标准化行尾（LF）
+*.rs eol=lf
+*.toml eol=lf
+*.json eol=lf
+*.md eol=lf
+*.js eol=lf
+*.ts eol=lf
+*.jsx eol=lf
+*.tsx eol=lf
+*.svelte eol=lf
+*.html eol=lf
+*.css eol=lf
+*.yml eol=lf
+*.yaml eol=lf
+*.sh eol=lf
+
+# Windows批处理文件保留CRLF
+*.bat eol=crlf
+*.cmd eol=crlf
+
+# 导出忽略文件
+.gitattributes export-ignore
+.gitignore export-ignore
+.github/ export-ignore
+.gitlab/ export-ignore
+
+# 开发工具配置
+.editorconfig export-ignore
+.prettierrc export-ignore
+.prettierignore export-ignore
+.eslintrc.* export-ignore
+.eslintignore export-ignore
+.stylelintrc.* export-ignore
+.stylelintignore export-ignore
+
+# 测试文件
+coverage/ export-ignore
+*.spec.* export-ignore
+*.test.* export-ignore
+
+# 文档
+docs/ export-ignore
+*.md export-ignore
+CHANGELOG.md export-ignore
+CONTRIBUTING.md export-ignore
+
+# 构建系统
+vite.config.* export-ignore
+rollup.config.* export-ignore
+webpack.config.* export-ignore
+tsconfig.* export-ignore
+jsconfig.json export-ignore
+postcss.config.* export-ignore
+tailwind.config.* export-ignore
+svelte.config.* export-ignore
+
+# 包管理器
+package.json export-ignore
+package-lock.json export-ignore
+Cargo.toml export-ignore
+Cargo.lock export-ignore
+
+# IDE配置
+.vscode/ export-ignore
+.idea/ export-ignore
+
+# 临时文件
+tmp/ export-ignore
+temp/ export-ignore
+*.tmp export-ignore
+*.temp export-ignore
+
+# 大文件过滤器
+*.db filter=lfs diff=lfs merge=lfs -text
+*.sqlite filter=lfs diff=lfs merge=lfs -text
+*.sqlite3 filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.dat filter=lfs diff=lfs merge=lfs -text
+*.dump filter=lfs diff=lfs merge=lfs -text
+*.gguf filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.ckpt filter=lfs diff=lfs merge=lfs -text
+
+# 语言统计
+*.rs linguist-detectable=true
+*.toml linguist-detectable=true
+*.json linguist-detectable=true
+*.md linguist-detectable=true
+*.js linguist-detectable=true
+*.ts linguist-detectable=true
+*.jsx linguist-detectable=true
+*.tsx linguist-detectable=true
+*.svelte linguist-detectable=true
+*.html linguist-detectable=true
+*.css linguist-detectable=true
+*.yml linguist-detectable=true
+*.yaml linguist-detectable=true
+*.sh linguist-detectable=true
