@@ -153,10 +153,13 @@ gamecraft-ai-studio/
 
 ### AI提供商配置
 支持多厂商AI服务：
-- **OpenAI**: GPT-4, GPT-3.5 Turbo
-- **Anthropic**: Claude 3系列
-- **智谱AI**: GLM-4
-- **百度文心**: ERNIE 4.0
+支持多厂商AI服务：
+- **OpenAI**: GPT-5.3及其以后版本
+- **Anthropic**: Claude 4.6系列及其以后版本
+- **google** :gemini 3.1及其以后版本
+- **智谱AI**: GLM-5
+- **deepseek**: v3.2及其以后版本
+- **kimi** : 2.5及其以后版本
 - **本地模型**: Ollama + Llama 3（隐私保护）
 
 ### 认证配置
