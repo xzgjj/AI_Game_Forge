@@ -1,45 +1,34 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { authStore } from './stores/auth.store';
+  import { authStore } from '$lib/stores/auth.store';
 
-  // 导入页面组件
-  import LoginPage from './components/auth/LoginPage.svelte';
-  import Dashboard from './components/dashboard/Dashboard.svelte';
-  import ConfigWizard from './components/wizard/ConfigWizard.svelte';
-  import AICanvas from './components/canvas/AICanvas.svelte';
+  import LoginPage from '$lib/components/auth/LoginPage.svelte';
+  import Dashboard from '$lib/components/dashboard/Dashboard.svelte';
+  import ConfigWizard from '$lib/components/wizard/ConfigWizard.svelte';
+  import AICanvas from '$lib/components/canvas/AICanvas.svelte';
 
-  // 当前页面状态
-  let currentPage: 'login' | 'dashboard' | 'wizard' | 'canvas' = 'login';
+  type AppPage = 'login' | 'dashboard' | 'wizard' | 'canvas';
+
+  let currentPage: AppPage = 'login';
   let isLoading = true;
 
   onMount(async () => {
-    // 检查用户是否已登录
-    await checkAuthStatus();
+    const isAuthenticated = await authStore.checkSession();
+    currentPage = isAuthenticated ? 'dashboard' : 'login';
     isLoading = false;
   });
 
-  async function checkAuthStatus() {
-    // TODO: 调用IPC检查会话状态
-    const isAuthenticated = false; // 临时值
-
-    if (isAuthenticated) {
-      currentPage = 'dashboard';
-    } else {
-      currentPage = 'login';
-    }
-  }
-
-  function handleLoginSuccess() {
+  function handleLoginSuccess(): void {
     currentPage = 'dashboard';
   }
 
-  function handleLogout() {
+  async function handleLogout(): Promise<void> {
+    await authStore.logout();
     currentPage = 'login';
   }
 
-  function navigateTo(page: typeof currentPage) {
-    currentPage = page;
+  function navigateTo(event: CustomEvent<'wizard' | 'canvas'>): void {
+    currentPage = event.detail;
   }
 </script>
 
@@ -59,9 +48,9 @@
     {:else if currentPage === 'dashboard'}
       <Dashboard on:logout={handleLogout} on:navigate={navigateTo} />
     {:else if currentPage === 'wizard'}
-      <ConfigWizard on:complete={() => navigateTo('canvas')} on:back={() => navigateTo('dashboard')} />
+      <ConfigWizard on:complete={() => (currentPage = 'canvas')} on:back={() => (currentPage = 'dashboard')} />
     {:else if currentPage === 'canvas'}
-      <AICanvas on:back={() => navigateTo('dashboard')} />
+      <AICanvas on:back={() => (currentPage = 'dashboard')} />
     {/if}
   {/if}
 </div>
@@ -99,6 +88,8 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>
