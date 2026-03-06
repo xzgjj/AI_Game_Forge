@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -28,26 +27,12 @@ export default defineConfig(async () => ({
     minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
     // 为调试构建生成 sourcemaps
     sourcemap: !!process.env.TAURI_DEBUG,
-    // 输出目录
     outDir: 'dist',
-    // 资源目录
     assetsDir: 'assets',
-    // 分块策略
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'src/index.html'),
-      },
-      output: {
-        manualChunks: {
-          vendor: ['svelte', '@tauri-apps/api'],
-          ui: ['tailwindcss'],
-        },
-      },
-    },
   },
   resolve: {
     alias: {
-      $lib: resolve(__dirname, 'src/lib'),
+      $lib: '/src/lib',
     },
   },
 }));
