@@ -151,8 +151,8 @@ GameCraft_AI_Studio_Architecture_Report.md
 /build/
 /bin/
 /.claude/
-CLAUDE.md
-notes.txt
+# CLAUDE.md - 由AI维护的项目准则，建议保留本地
+# notes.txt - 开发笔记，现在由git跟踪以保持同步
 diff.md
 
 # 临时生成文件
