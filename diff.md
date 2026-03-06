@@ -89,3 +89,32 @@
 1. 业务服务已具备基础可运行闭环，前端可逐步切换到真实调用。
 2. 提供商路由与预算告警可支持多厂商 token/成本治理。
 3. 由于本机缺少 Rust 工具链，Rust 测试仍需在安装 `cargo` 后补跑验证。
+
+## 2026-03-06 数据层（Data Layer）实现与最小测试
+
+### 涉及文件
+1. `src-tauri/src/database/mod.rs`
+2. `src-tauri/src/database/migrations/mod.rs`
+3. `src-tauri/src/database/schema.rs`
+4. `src-tauri/src/database/repository.rs`
+5. `src-tauri/src/lib.rs`
+6. `src-tauri/migrations/00000000000001_initial/up.sql`
+7. `src-tauri/migrations/00000000000001_initial/down.sql`
+8. `src-tauri/tests/data_layer/repository_smoke.rs`
+
+### 核心 Diff 摘要
+- 新增首版 SQLite 迁移脚本：创建 users/projects/ai_logs/game_specs/api_stats/auth_sessions 表与关键索引。
+- 增强数据库管理器：修正连接初始化、迁移调用、完整性检查与统计信息输出。
+- 提供运行时 schema：补齐 Diesel table 定义并允许跨表查询。
+- 实现仓储层最小可用 CRUD：用户、项目、AI日志、游戏配置、API统计、认证会话仓储及管理器。
+- 增加数据层最小测试：仓储 smoke 测试覆盖创建/查询/活跃会话路径。
+
+### 修改意图
+1. 让 Data Layer 从占位文件进入可用状态，支持后续业务层/IPC 层联调。
+2. 先以最小实现保障接口稳定，再在后续迭代替换为完整 Diesel 查询实现。
+3. 为数据库迁移和结构演进建立统一入口，便于版本化维护。
+
+### 对项目的影响
+1. 数据层具备基础结构与迁移脚手架，启动期可完成 schema 建立。
+2. 仓储层可直接支持业务层单元测试与离线验证。
+3. 当前环境缺少 Rust 工具链，Rust 测试尚未执行，需要补装 cargo 后复测。
