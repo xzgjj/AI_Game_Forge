@@ -150,4 +150,33 @@
 ### 对项目的影响
 1. 前端页面可直接调用完整 IPC（认证、配置、AI、项目、统计），不再依赖纯占位接口。
 2. 已完成前端构建链验证：`npm run check` / `npm run test -- --run` / `npm run build` 通过（在提权环境）。
-3. Rust 侧仍受本机环境限制：`cargo` 未安装，`cargo test` 与 `tauri dev/build` 仍不可执行（当前会报 `cargo metadata ... program not found`）。
+3. Rust 侧已补齐工具链后可执行构建与测试；后续仍需持续清理 warning 与配置冗余项。
+
+## 2026-03-06 基础设施层跑通修复（Rust环境补齐后）
+
+### 涉及文件
+1. `src-tauri/Cargo.toml`
+2. `src-tauri/src/main.rs`
+3. `src-tauri/src/database/mod.rs`
+4. `src-tauri/src/database/repository.rs`
+5. `src-tauri/src/models/auth_session.rs`
+6. `src-tauri/src/services/api_mgmt_service.rs`
+7. `src-tauri/icons/icon.ico`
+8. `.gitignore`
+
+### 核心 Diff 摘要
+- 修复 `Cargo.toml` 无效 feature 与旧版 Tauri feature 配置，消除 `cargo` 解析/选型错误。
+- 修复仓储层泛型默认实现、数据库 trait 引入、会话模型借用冲突、路由策略 move 问题。
+- 补齐 `src-tauri/icons/icon.ico`，解决 Tauri Windows 资源生成报错。
+- 移除与 `tauri-plugin-log` 冲突的 `env_logger::init()`，并临时移除 `updater` 插件初始化以避免配置阻断。
+- 增加 `src-tauri/gen/` 忽略规则，避免运行态 schema 产物污染版本库。
+
+### 修改意图
+1. 在 Rust/Cargo 可用后，优先把“编译失败/启动失败”链路全部打通。
+2. 先保证 `cargo test` 与应用启动可执行，再逐步清理 warning 和非阻塞问题。
+3. 让你可以直接在本机看到桌面窗口并继续按视觉反馈迭代 UI。
+
+### 对项目的影响
+1. `cargo test` 已通过（22/22，lib/bin 双套测试均通过）。
+2. `npm run check`、`npm run test -- --run`、`npm run build` 均通过。
+3. 桌面程序可启动运行（当前保留大量 warning，不影响最小可运行闭环）。

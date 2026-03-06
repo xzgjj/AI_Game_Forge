@@ -211,7 +211,7 @@ impl DeviceInfo {
         }
     }
 
-    fn parse_user_agent(user_agent: &str) -> (&str, &str) {
+    fn parse_user_agent(user_agent: &str) -> (&'static str, &'static str) {
         let ua = user_agent.to_lowercase();
 
         // 检测操作系统

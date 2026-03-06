@@ -20,9 +20,16 @@ pub trait Repository<T: Clone + Send + Sync + 'static> {
     fn count(&self) -> Result<i64>;
 }
 
-#[derive(Default)]
 struct InMemoryTable<T: Clone> {
     items: RwLock<HashMap<Uuid, T>>,
+}
+
+impl<T: Clone> Default for InMemoryTable<T> {
+    fn default() -> Self {
+        Self {
+            items: RwLock::new(HashMap::new()),
+        }
+    }
 }
 
 impl<T: Clone> InMemoryTable<T> {

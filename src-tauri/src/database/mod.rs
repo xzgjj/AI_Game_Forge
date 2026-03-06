@@ -7,9 +7,10 @@ pub mod schema;
 
 use std::sync::Arc;
 use anyhow::Result;
+use diesel::RunQueryDsl;
 use diesel::sqlite::SqliteConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 use log::{info, warn};
 
 /// 数据库连接池类型
@@ -78,8 +79,6 @@ impl DatabaseManager {
 
     /// 配置数据库
     fn configure_database(conn: &mut SqliteConnection, config: &DatabaseConfig) -> Result<()> {
-        use diesel::RunQueryDsl;
-
         // 启用外键约束
         if config.enable_foreign_keys {
             diesel::sql_query("PRAGMA foreign_keys = ON;").execute(conn)?;
