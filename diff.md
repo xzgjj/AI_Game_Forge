@@ -53,3 +53,39 @@
 ---
 
 *本文档记录项目的关键代码修改，按时间倒序排列*
+## 2026-03-06 业务逻辑层最小可用实现与测试
+
+### 涉及文件
+1. `src-tauri/src/services/auth_service.rs`
+2. `src-tauri/src/services/game_config_service.rs`
+3. `src-tauri/src/services/ai_collab_service.rs`
+4. `src-tauri/src/services/api_mgmt_service.rs`
+5. `src-tauri/src/services/provider_manager.rs`
+6. `src-tauri/src/services/user_service.rs`
+7. `src-tauri/src/services/audit_service.rs`
+8. `src-tauri/src/services/mod.rs`
+9. `src-tauri/src/lib.rs`
+10. `src-tauri/src/utils/mod.rs`
+11. `src-tauri/tests/business_logic/smoke.rs`
+12. `.gitignore`
+13. `README.md`
+14. `doc/说明.md`
+
+### 核心 Diff 摘要
+- 认证服务：实现微信/手机/邮箱/OAuth 登录、会话验证、刷新、登出和失败次数限制。
+- 游戏配置服务：实现草稿创建、故事字段更新、角色/地点/机制写入与版本递增。
+- AI 协作服务：实现提供商选择、历史记录、再生成、DeepSeek `<thinking>` 清洗。
+- API 管理服务：实现平衡路由、统计聚合、预算校验与预算告警。
+- 用户/审计服务：实现用户资料与偏好更新、消费累积、审计事件记录与筛选。
+- 服务初始化：增加 `ServiceContainer`，统一托管核心业务服务。
+- 测试：增加业务层 smoke 测试和服务内单测（受当前环境影响未执行 Rust 测试）。
+
+### 修改意图
+1. 让业务逻辑层从“空壳 TODO”进入“可调用、可测试、可扩展”的最小可用状态。
+2. 对齐模块功能清单中的认证、AI管理、配置、审计和用户管理核心路径。
+3. 为后续 IPC 层联调和数据层持久化接入提供稳定服务接口。
+
+### 对项目的影响
+1. 业务服务已具备基础可运行闭环，前端可逐步切换到真实调用。
+2. 提供商路由与预算告警可支持多厂商 token/成本治理。
+3. 由于本机缺少 Rust 工具链，Rust 测试仍需在安装 `cargo` 后补跑验证。
