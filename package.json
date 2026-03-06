@@ -17,7 +17,15 @@
     "test:ui": "vitest --ui",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "wf:all": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task all",
+    "wf:check": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task check",
+    "wf:test": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task test",
+    "wf:build": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task build",
+    "wf:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task clean",
+    "wf:clean:deep": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task clean -DeepClean",
+    "wf:tauri:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task tauri-dev",
+    "wf:tauri:build": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\workflow.ps1 -Task tauri-build"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
