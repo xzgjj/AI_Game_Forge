@@ -118,3 +118,33 @@
 1. 数据层具备基础结构与迁移脚手架，启动期可完成 schema 建立。
 2. 仓储层可直接支持业务层单元测试与离线验证。
 3. 当前环境缺少 Rust 工具链，Rust 测试尚未执行，需要补装 cargo 后复测。
+
+## 2026-03-06 基础设施层（Infrastructure Layer）IPC落地与演示构建
+
+### 涉及文件
+1. `src-tauri/src/main.rs`
+2. `src-tauri/src/ipc/auth.rs`
+3. `src-tauri/src/ipc/api_stats.rs`
+4. `src-tauri/src/ipc/ai_engine.rs`
+5. `src-tauri/src/ipc/game_config.rs`
+6. `src-tauri/src/ipc/project.rs`
+7. `src-tauri/src/services/mod.rs`
+8. `src-tauri/src/services/project_service.rs`
+9. `src-tauri/tests/infrastructure_layer/smoke.rs`
+
+### 核心 Diff 摘要
+- IPC 命令从占位逻辑切换为真实服务调用：认证、AI生成、API统计、游戏配置、项目管理全链路可调用。
+- 新增 `ProjectService`：实现项目创建、保存版本、加载、导出、列表筛选、软删除/恢复。
+- 主进程 `main.rs` 重构：兼容当前 Tauri 2 写法并补全命令注册，统一在 setup 初始化数据库与服务容器。
+- 增加演示提供商 `demo`：在无外部密钥场景下可走通 AI 生成与统计面板最小闭环。
+- 新增基础设施层最小 smoke 测试文件（待 Rust 工具链环境补跑）。
+
+### 修改意图
+1. 让基础设施层从“接口定义”进入“端到端可调用”，支撑前端真实 invoke 与演示联调。
+2. 在未接入真实多厂商密钥前，提供可稳定复现的 demo provider，避免演示阻塞。
+3. 为后续可视化验证和问题定位建立统一入口（主进程命令挂载 + 项目管理服务）。
+
+### 对项目的影响
+1. 前端页面可直接调用完整 IPC（认证、配置、AI、项目、统计），不再依赖纯占位接口。
+2. 已完成前端构建链验证：`npm run check` / `npm run test -- --run` / `npm run build` 通过（在提权环境）。
+3. Rust 侧仍受本机环境限制：`cargo` 未安装，`cargo test` 与 `tauri dev/build` 暂不可执行。

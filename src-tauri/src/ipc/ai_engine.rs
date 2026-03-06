@@ -1,20 +1,23 @@
-//! AI引擎接口模块
+﻿//! AI引擎接口模块
 //! 处理AI内容生成、重新生成、历史查询等操作
 
 use serde::{Deserialize, Serialize};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 use uuid::Uuid;
+
+use crate::providers;
+use crate::services::ServiceContainer;
 
 /// 生成内容类型
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ContentType {
-    Character,   // 角色设计
-    Scene,       // 场景描述
-    Dialogue,    // 对话台词
-    Item,        // 物品描述
-    Quest,       // 任务设计
-    Mechanism,   // 机制设计
-    Other(String), // 其他类型
+    Character,
+    Scene,
+    Dialogue,
+    Item,
+    Quest,
+    Mechanism,
+    Other(String),
 }
 
 /// AI生成请求
@@ -56,34 +59,94 @@ pub struct GenerationHistory {
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
-/// 生成内容接口
+fn to_provider_content_type(content_type: ContentType) -> providers::ContentType {
+    match content_type {
+        ContentType::Character => providers::ContentType::Character,
+        ContentType::Scene => providers::ContentType::Scene,
+        ContentType::Dialogue => providers::ContentType::Dialogue,
+        ContentType::Item => providers::ContentType::Item,
+        ContentType::Quest => providers::ContentType::Quest,
+        ContentType::Mechanism => providers::ContentType::Mechanism,
+        ContentType::Other(value) => providers::ContentType::Other(value),
+    }
+}
+
+fn from_provider_content_type(content_type: providers::ContentType) -> ContentType {
+    match content_type {
+        providers::ContentType::Character => ContentType::Character,
+        providers::ContentType::Scene => ContentType::Scene,
+        providers::ContentType::Dialogue => ContentType::Dialogue,
+        providers::ContentType::Item => ContentType::Item,
+        providers::ContentType::Quest => ContentType::Quest,
+        providers::ContentType::Mechanism => ContentType::Mechanism,
+        providers::ContentType::Other(value) => ContentType::Other(value),
+    }
+}
+
+fn to_provider_request(request: AIGenerationRequest) -> providers::AIGenerationRequest {
+    providers::AIGenerationRequest {
+        project_id: request.project_id,
+        content_type: to_provider_content_type(request.content_type),
+        prompt: request.prompt,
+        context: request.context,
+        provider_preference: request.provider_preference,
+        max_tokens: request.max_tokens,
+        temperature: request.temperature,
+    }
+}
+
+fn from_provider_response(response: providers::AIGenerationResponse) -> AIGenerationResponse {
+    AIGenerationResponse {
+        id: response.id,
+        request: AIGenerationRequest {
+            project_id: response.request.project_id,
+            content_type: from_provider_content_type(response.request.content_type),
+            prompt: response.request.prompt,
+            context: response.request.context,
+            provider_preference: response.request.provider_preference,
+            max_tokens: response.request.max_tokens,
+            temperature: response.request.temperature,
+        },
+        content: response.content,
+        provider_used: response.provider_used,
+        tokens_used: response.tokens_used,
+        cost: response.cost,
+        generated_at: response.generated_at,
+        metadata: response.metadata,
+    }
+}
+
 #[tauri::command]
 pub async fn generate_content(
     app_handle: AppHandle,
     request: AIGenerationRequest,
 ) -> Result<AIGenerationResponse, String> {
-    log::info!("Generating AI content for project: {}", request.project_id);
+    let services = app_handle.state::<ServiceContainer>();
 
-    // TODO: 实现生成逻辑
-
-    Err("AI内容生成服务未实现".to_string())
+    services
+        .ai_collab_service
+        .generate(to_provider_request(request))
+        .await
+        .map(from_provider_response)
+        .map_err(|error| error.to_string())
 }
 
-/// 重新生成内容接口
 #[tauri::command]
 pub async fn regenerate_content(
     app_handle: AppHandle,
     generation_id: Uuid,
     modifications: serde_json::Value,
 ) -> Result<AIGenerationResponse, String> {
-    log::info!("Regenerating content: {}", generation_id);
+    let services = app_handle.state::<ServiceContainer>();
 
-    // TODO: 实现重新生成逻辑
-
-    Err("内容重新生成服务未实现".to_string())
+    services
+        .ai_collab_service
+        .regenerate(generation_id, modifications)
+        .await
+        .map(from_provider_response)
+        .map_err(|error| error.to_string())
 }
 
-/// 获取生成历史接口
 #[tauri::command]
 pub async fn get_generation_history(
     app_handle: AppHandle,
@@ -92,27 +155,34 @@ pub async fn get_generation_history(
     limit: Option<u32>,
     offset: Option<u32>,
 ) -> Result<Vec<GenerationHistory>, String> {
-    log::debug!("Getting generation history for project: {}", project_id);
+    let services = app_handle.state::<ServiceContainer>();
 
-    // TODO: 实现历史查询逻辑
+    let history = services.ai_collab_service.get_generation_history(
+        project_id,
+        content_type.map(to_provider_content_type),
+        limit,
+        offset,
+    );
 
-    Ok(Vec::new())
+    Ok(history
+        .into_iter()
+        .map(|item| GenerationHistory {
+            id: item.id,
+            project_id: item.request.project_id,
+            content_type: from_provider_content_type(item.request.content_type),
+            prompt: item.request.prompt,
+            content: item.content,
+            provider: item.provider_used,
+            tokens: item.tokens_used,
+            cost: item.cost,
+            created_at: item.generated_at,
+        })
+        .collect())
 }
 
-/// 获取AI提供商状态接口
 #[tauri::command]
-pub async fn get_provider_status(
-    app_handle: AppHandle,
-) -> Result<serde_json::Value, String> {
-    log::debug!("Getting AI provider status");
-
-    // TODO: 实现提供商状态检查
-
-    Ok(serde_json::json!({
-        "openai": {"available": true, "cost_per_1k": 0.03},
-        "claude": {"available": true, "cost_per_1k": 0.015},
-        "zhipu": {"available": false, "cost_per_1k": 0.05},
-        "baidu": {"available": false, "cost_per_1k": 0.04},
-        "local": {"available": false, "cost_per_1k": 0.0}
-    }))
+pub async fn get_provider_status(app_handle: AppHandle) -> Result<serde_json::Value, String> {
+    let services = app_handle.state::<ServiceContainer>();
+    let status = services.api_mgmt_service.get_provider_status().await;
+    Ok(serde_json::to_value(status).unwrap_or_else(|_| serde_json::json!({})))
 }
