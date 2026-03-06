@@ -4,7 +4,7 @@
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, RwLock};
 use anyhow::{Result, anyhow};
-use chrono::{Utc, Duration};
+use chrono::Utc;
 use serde_json::Value;
 
 use crate::providers::{AIProvider, AIGenerationRequest, AIGenerationResponse};
@@ -191,9 +191,30 @@ impl APIManagementService {
 
     /// 平衡选择
     fn select_balanced(&self, providers: &[String], _request: &AIGenerationRequest) -> Result<String> {
-        // TODO: 实现综合评分算法
-        // 考虑成本、速度、质量、使用频率等因素
-        Ok(self.config.default_provider.clone())
+        let stats = self.stats.read().unwrap();
+
+        providers
+            .iter()
+            .filter_map(|name| {
+                stats.get(name).map(|stat| {
+                    let success_rate = if stat.total_requests > 0 {
+                        stat.successful_requests as f64 / stat.total_requests as f64
+                    } else {
+                        1.0
+                    };
+
+                    let avg_cost = stat.total_cost / stat.total_requests.max(1) as f64;
+                    let speed_score = 1.0 / (1.0 + stat.avg_response_time_ms / 1000.0);
+                    let cost_score = 1.0 / (1.0 + avg_cost);
+
+                    // 平衡评分: 成功率 > 速度 > 成本
+                    let score = success_rate * 0.45 + speed_score * 0.35 + cost_score * 0.20;
+                    (name, score)
+                })
+            })
+            .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+            .map(|(name, _)| name.clone())
+            .ok_or_else(|| anyhow!("无法选择平衡策略提供商"))
     }
 
     /// 执行请求
@@ -219,6 +240,14 @@ impl APIManagementService {
 
         // 更新统计
         self.update_stats(&provider_name, &result, duration).await;
+
+        {
+            let mut history = self.request_history.write().unwrap();
+            history.push_back(request);
+            if history.len() > self.config.cache_size {
+                history.pop_front();
+            }
+        }
 
         result
     }
@@ -300,22 +329,55 @@ impl APIManagementService {
     pub async fn get_usage_stats(&self, period: StatsPeriod) -> Result<UsageStats> {
         log::info!("Getting usage stats for period: {:?}", period);
 
-        // TODO: 从数据库查询详细统计
+        let stats = self.stats.read().unwrap();
+        let mut by_provider = Vec::new();
+        let mut total_requests: i64 = 0;
+        let mut total_tokens: i64 = 0;
+        let mut total_cost: f64 = 0.0;
+
+        for provider in stats.values() {
+            total_requests += to_i64(provider.total_requests);
+            total_tokens += to_i64(provider.total_tokens);
+            total_cost += provider.total_cost;
+
+            by_provider.push(ProviderStats {
+                name: provider.name.clone(),
+                requests: to_i64(provider.total_requests),
+                tokens: to_i64(provider.total_tokens),
+                cost: provider.total_cost,
+                success_rate: if provider.total_requests > 0 {
+                    provider.successful_requests as f64 / provider.total_requests as f64
+                } else {
+                    0.0
+                },
+                avg_response_time: provider.avg_response_time_ms,
+            });
+        }
+
+        by_provider.sort_by(|a, b| b.cost.partial_cmp(&a.cost).unwrap_or(std::cmp::Ordering::Equal));
 
         Ok(UsageStats {
             period,
-            total_requests: 0,
-            total_tokens: 0,
-            total_cost: 0.0,
-            by_provider: Vec::new(),
+            total_requests,
+            total_tokens,
+            total_cost,
+            by_provider,
             by_project: Vec::new(),
-            cost_trend: Vec::new(),
+            cost_trend: vec![DailyCost {
+                date: Utc::now().date_naive(),
+                cost: total_cost,
+                tokens: total_tokens,
+            }],
         })
     }
 
     /// 设置预算限制
     pub async fn set_budget_limit(&self, provider: String, monthly_limit: f64) -> Result<bool> {
         log::info!("Setting budget limit for {}: ${}", provider, monthly_limit);
+
+        if monthly_limit <= 0.0 {
+            return Err(anyhow!("预算上限必须大于0"));
+        }
 
         let mut budgets = self.budgets.write().unwrap();
 
@@ -342,6 +404,10 @@ impl APIManagementService {
         let budgets = self.budgets.read().unwrap();
 
         for budget in budgets.iter() {
+            if budget.monthly_limit <= 0.0 {
+                continue;
+            }
+
             let usage_ratio = budget.current_month_spent / budget.monthly_limit;
 
             if usage_ratio >= 0.95 {
@@ -405,6 +471,25 @@ impl APIManagementService {
 
         status
     }
+
+    /// 更新预算消耗（用于测试和离线统计）
+    pub fn update_budget_spent(&self, provider: &str, amount: f64) {
+        if amount <= 0.0 {
+            return;
+        }
+
+        let mut budgets = self.budgets.write().unwrap();
+        for budget in budgets.iter_mut() {
+            if budget.provider_name == provider || budget.provider_name == "all" {
+                budget.current_month_spent += amount;
+            }
+        }
+    }
+
+    /// 获取已注册提供商数量
+    pub fn provider_count(&self) -> usize {
+        self.providers.len()
+    }
 }
 
 impl Default for APIMgmtConfig {
@@ -425,5 +510,131 @@ impl Default for APIMgmtConfig {
             max_retries: 3,
             cost_currency: "USD".to_string(),
         }
+    }
+}
+
+fn to_i64(value: u64) -> i64 {
+    i64::try_from(value).unwrap_or(i64::MAX)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use async_trait::async_trait;
+    use uuid::Uuid;
+
+    struct MockProvider {
+        provider_name: String,
+        succeed: bool,
+        cost: f64,
+    }
+
+    #[async_trait]
+    impl AIProvider for MockProvider {
+        fn name(&self) -> &str {
+            &self.provider_name
+        }
+
+        fn display_name(&self) -> &str {
+            &self.provider_name
+        }
+
+        async fn is_available(&self) -> bool {
+            true
+        }
+
+        async fn generate(&self, request: AIGenerationRequest) -> Result<AIGenerationResponse> {
+            if !self.succeed {
+                return Err(anyhow!("provider failure"));
+            }
+
+            Ok(AIGenerationResponse {
+                id: Uuid::new_v4(),
+                request,
+                content: "ok".to_string(),
+                provider_used: self.provider_name.clone(),
+                tokens_used: 100,
+                cost: self.cost,
+                generated_at: Utc::now(),
+                metadata: serde_json::json!({}),
+            })
+        }
+
+        fn get_config(&self) -> crate::providers::ProviderConfig {
+            crate::providers::ProviderConfig {
+                api_key: None,
+                base_url: None,
+                default_model: "mock".to_string(),
+                max_tokens: 1024,
+                temperature: 0.7,
+                timeout_seconds: 30,
+                cost_per_1k_input: 0.0,
+                cost_per_1k_output: 0.0,
+                enabled: true,
+            }
+        }
+
+        async fn get_stats(&self) -> crate::providers::ProviderStats {
+            crate::providers::ProviderStats {
+                total_requests: 0,
+                successful_requests: 0,
+                failed_requests: 0,
+                total_tokens: 0,
+                total_cost: 0.0,
+                avg_response_time_ms: 0.0,
+                last_used: None,
+            }
+        }
+
+        async fn test_connection(&self) -> Result<()> {
+            Ok(())
+        }
+    }
+
+    fn sample_request() -> AIGenerationRequest {
+        AIGenerationRequest {
+            project_id: Uuid::new_v4(),
+            content_type: crate::providers::ContentType::Dialogue,
+            prompt: "test".to_string(),
+            context: serde_json::json!({}),
+            provider_preference: None,
+            max_tokens: Some(64),
+            temperature: Some(0.5),
+        }
+    }
+
+    #[tokio::test]
+    async fn smart_route_should_select_and_execute_provider() {
+        let mut service = APIManagementService::new(APIMgmtConfig::default());
+        service.register_provider(
+            "openai".to_string(),
+            Arc::new(MockProvider {
+                provider_name: "openai".to_string(),
+                succeed: true,
+                cost: 0.02,
+            }),
+        );
+
+        let response = service
+            .smart_route(sample_request())
+            .await
+            .expect("smart route should succeed");
+
+        assert_eq!(response.provider_used, "openai");
+        assert_eq!(service.provider_count(), 1);
+    }
+
+    #[tokio::test]
+    async fn budget_alerts_should_trigger() {
+        let service = APIManagementService::new(APIMgmtConfig::default());
+        service
+            .set_budget_limit("all".to_string(), 100.0)
+            .await
+            .expect("set budget should succeed");
+        service.update_budget_spent("all", 85.0);
+
+        let alerts = service.check_budget_alerts().await;
+        assert!(!alerts.is_empty());
+        assert!(matches!(alerts[0].level, AlertLevel::Warning | AlertLevel::Danger));
     }
 }
