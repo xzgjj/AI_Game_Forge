@@ -1,13 +1,23 @@
 # CLAUDE.md - GameCraft AI Studio 项目准则
 
+
+
 ## 项目简介
+
 GameCraft AI Studio 是一个跨平台桌面应用，通过AI协作式生成工具，让非专业用户快速创建个性化游戏。
 
+
+
 ## 构建与运行指令
+
+
+
 ### 环境准备
 - **Node.js 20+** 与 **npm**
 - **Rust 1.70+** 与 **Cargo**
 - **Tauri CLI**: `cargo install tauri-cli`
+
+
 
 ### 安装与运行
 ```bash
@@ -25,7 +35,12 @@ npm run dev
 npm run tauri build
 ```
 
+
+
 ## 代码规范
+
+
+
 ### Rust 代码
 - 使用 `cargo fmt` 格式化，遵循 Rust 官方风格
 - 使用 `cargo clippy` 进行代码检查，禁止 warnings
@@ -38,12 +53,20 @@ npm run tauri build
 - 组件：Svelte 5 语法，使用 runes 响应式系统
 - 命名：camelCase 变量，PascalCase 组件，kebab-case 文件名
 
+
+
 ### 提交规范
+
 - Conventional Commits 格式：`<类型>[可选范围]: <描述>`
 - 类型：feat, fix, docs, style, refactor, test, chore
 - 示例：`feat(auth): 添加微信扫码登录功能`
 
+
+
 ## 常用命令
+
+
+
 ```bash
 # 开发
 npm run tauri dev          # 完整Tauri开发模式
@@ -66,14 +89,24 @@ cd src-tauri && cargo test # Rust单元测试
 npm run tauri build       # 生产构建
 ```
 
+
+
 ## 核心约束
+
+
+
 1. **AI提供商兼容性**：所有AI提供商必须实现统一的 `Provider` trait，支持流式输出和思考Token处理
 2. **数据持久化**：使用 SQLite + Diesel ORM，所有数据变更必须通过迁移文件
 3. **安全存储**：敏感信息（API密钥、会话令牌）使用系统安全存储（Tauri plugin-store）
 4. **错误处理**：前端展示用户友好错误，后端记录详细日志
 5. **性能**：大文件导出、AI生成等耗时操作必须支持进度反馈和取消
 
+
+
 ## 核心逻辑速览
+
+
+
 ### 关键模块
 - **认证系统** (`src-tauri/src/services/auth_service.rs`)：多方式登录（邮箱、OAuth、微信、手机）
 - **AI协作引擎** (`src-tauri/src/services/ai_collab_service.rs`)：协调多个AI提供商，处理思考Token，管理生成历史
@@ -86,7 +119,12 @@ npm run tauri build       # 生产构建
 2. AI生成：用户输入 → AI提供商适配器 → 流式返回 → 前端实时显示
 3. 审计追踪：所有操作自动记录到 `ai_logs` 表，包含完整上下文
 
+
+
 ## 安全与代码质量
+
+
+
 ### 安全要求
 - 输入验证：所有用户输入必须在前端和后端双重验证
 - API密钥：永不硬编码，通过环境变量或安全存储注入
@@ -99,13 +137,20 @@ npm run tauri build       # 生产构建
 - 性能监控：记录AI调用耗时、内存使用情况
 - 日志分级：debug/info/warn/error，生产环境只记录info以上
 
+
+
 ## AI协作原则
+
+
+
 ### 修改调整范围
 - **允许**：修复bug，优化性能，添加测试，改进文档
 - **允许**：实现已规划的功能（参考README路线图）
 - **允许**：重构代码以提高可读性，但必须保持接口兼容
 - **禁止**：未经讨论更改架构决策（需先创建ADR）
 - **禁止**：删除已上线功能，除非有明确迁移方案
+
+
 
 ### DeepSeek R1 特别注意事项
 - **思考Token处理**：DeepSeek R1输出中包含 `<thinking>` 标签，必须在展示前过滤

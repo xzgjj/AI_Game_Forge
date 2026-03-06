@@ -7,6 +7,8 @@
 
 **GameCraft AI Studio** 是一个跨平台桌面应用（Windows/macOS），通过AI协作式游戏生成工具，让非专业用户快速创建个性化游戏。
 
+
+
 ## ✨ 核心特性
 
 - **🎮 多元登录系统**：支持微信扫码、手机验证、邮箱注册、第三方OAuth（GitHub/Google）
@@ -16,7 +18,11 @@
 - **🔍 审计追踪**：完整记录所有AI调用、用户操作、生成历史
 - **💰 API统计面板**：多厂商AI提供商管理，实时Token消耗统计，成本分析与预算管理
 
+
+
 ## 🏗️ 系统架构
+
+
 
 ### 技术栈
 - **桌面框架**: Tauri 2.0 + Rust
@@ -24,6 +30,8 @@
 - **UI/动画**: Tailwind CSS + Framer Motion + Lottie
 - **本地存储**: SQLite + Diesel ORM
 - **状态管理**: Svelte Stores
+
+
 
 ### 逻辑架构
 ```
@@ -54,13 +62,19 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
+
+
 ## 🚀 快速开始
+
+
 
 ### 环境要求
 - **Rust 1.70+**: `rustup install stable`
 - **Node.js 20+**: 推荐使用 [nvm](https://github.com/nvm-sh/nvm)
 - **Tauri CLI**: `cargo install tauri-cli`
 - **Git**: 版本控制
+
+
 
 ### 安装与运行
 ```bash
@@ -100,7 +114,11 @@ npm test
 cd src-tauri && cargo test
 ```
 
+
+
 ## 📁 项目结构
+
+
 
 ```
 gamecraft-ai-studio/
@@ -127,7 +145,11 @@ gamecraft-ai-studio/
 └── tests/                       # 测试文件
 ```
 
+
+
 ## 🔧 配置说明
+
+
 
 ### AI提供商配置
 支持多厂商AI服务：
@@ -143,7 +165,11 @@ gamecraft-ai-studio/
 - **邮箱验证**: SMTP服务
 - **第三方OAuth**: GitHub, Google
 
+
+
 ## 📈 开发路线图
+
+
 
 ### MVP阶段（0-3个月）
 - [x] 基础框架搭建（Tauri+Svelte+SQLite）
@@ -160,6 +186,8 @@ gamecraft-ai-studio/
 - [ ] 社区功能+模板市场
 - [ ] 企业级功能（团队协作、高级统计）
 
+
+
 ## 🤝 贡献指南
 
 我们欢迎所有形式的贡献！请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
@@ -169,11 +197,15 @@ gamecraft-ai-studio/
 3. **代码贡献**: Fork项目并提交Pull Request
 4. **文档改进**: 帮助完善文档和示例
 
+
+
 ### 代码规范
 - **Rust**: 遵循Clippy检查，rustfmt格式化
 - **TypeScript**: ESLint + Prettier，严格模式
 - **提交信息**: Conventional Commits规范
 - **测试**: 单元测试 + 集成测试 + E2E测试
+
+
 
 ## 📄 许可证
 
@@ -183,12 +215,16 @@ gamecraft-ai-studio/
 
 您可以选择任一许可证。
 
+
+
 ## 🙏 致谢
 
 - **Tauri团队**: 提供优秀的跨平台桌面应用框架
 - **Svelte团队**: 创新的前端框架
 - **AI提供商**: OpenAI, Anthropic, 智谱AI, 百度等
 - **所有贡献者**: 感谢你们的代码、反馈和支持
+
+
 
 ## 📞 联系方式
 
