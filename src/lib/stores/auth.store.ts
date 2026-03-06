@@ -1,18 +1,19 @@
-import { writable } from 'svelte/store';
-import { invoke } from '@tauri-apps/api/core';
-
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  avatar_url?: string;
-  role: 'guest' | 'user' | 'pro' | 'admin';
-  preferences: Record<string, any>;
-}
+﻿import { writable } from 'svelte/store';
+import type { UserInfo } from '$lib/types/auth.types';
+import {
+  buildSession,
+  loginWithEmail,
+  loginWithOAuth,
+  loginWithPhone,
+  loginWithWechat,
+  logoutSession,
+  registerByEmail,
+  validateSession,
+} from '$lib/services/auth.service';
 
 export interface AuthState {
   isAuthenticated: boolean;
-  user: User | null;
+  user: UserInfo | null;
   token: string | null;
   loading: boolean;
   error: string | null;
@@ -26,165 +27,162 @@ const initialState: AuthState = {
   error: null,
 };
 
+const TOKEN_KEY = 'auth_token';
+const SESSION_KEY = 'auth_session';
+
+function getStorage(): Storage | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.localStorage;
+}
+
+function persistToken(token: string, userId: string): void {
+  const storage = getStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  storage.setItem(TOKEN_KEY, token);
+  storage.setItem(SESSION_KEY, JSON.stringify(buildSession(token, userId)));
+}
+
+function clearPersistedToken(): void {
+  const storage = getStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  storage.removeItem(TOKEN_KEY);
+  storage.removeItem(SESSION_KEY);
+}
+
+function getPersistedToken(): string | null {
+  const storage = getStorage();
+  return storage ? storage.getItem(TOKEN_KEY) : null;
+}
+
 function createAuthStore() {
   const { subscribe, set, update } = writable<AuthState>(initialState);
+
+  async function applyAuthResult(result: { success: boolean; token?: string; user?: UserInfo; error?: string }): Promise<boolean> {
+    if (!result.success || !result.token || !result.user) {
+      update((state) => ({
+        ...state,
+        loading: false,
+        error: result.error ?? '登录失败，请重试',
+      }));
+
+      return false;
+    }
+
+    persistToken(result.token, result.user.id);
+
+    set({
+      isAuthenticated: true,
+      user: result.user,
+      token: result.token,
+      loading: false,
+      error: null,
+    });
+
+    return true;
+  }
 
   return {
     subscribe,
 
-    // 登录
-    async login(email: string, password: string) {
-      update(state => ({ ...state, loading: true, error: null }));
+    async login(email: string, password: string): Promise<boolean> {
+      update((state) => ({ ...state, loading: true, error: null }));
+      const result = await loginWithEmail(email, password);
+      return applyAuthResult(result);
+    },
 
-      try {
-        // TODO: 调用IPC登录接口
-        // const result = await invoke('login', { email, password });
+    async wechatLogin(authCode: string): Promise<boolean> {
+      update((state) => ({ ...state, loading: true, error: null }));
+      const result = await loginWithWechat(authCode);
+      return applyAuthResult(result);
+    },
 
-        // 模拟成功登录
-        const mockUser: User = {
-          id: 'user-123',
-          email,
-          username: email.split('@')[0],
-          role: 'user',
-          preferences: {},
-        };
+    async phoneLogin(phone: string, code: string): Promise<boolean> {
+      update((state) => ({ ...state, loading: true, error: null }));
+      const result = await loginWithPhone(phone, code);
+      return applyAuthResult(result);
+    },
 
-        set({
-          isAuthenticated: true,
-          user: mockUser,
-          token: 'mock-jwt-token',
-          loading: false,
-          error: null,
-        });
+    async emailRegister(email: string, password: string, code: string): Promise<boolean> {
+      update((state) => ({ ...state, loading: true, error: null }));
+      const result = await registerByEmail(email, password, code);
+      return applyAuthResult(result);
+    },
 
-        // 保存到本地存储
-        localStorage.setItem('auth_token', 'mock-jwt-token');
-      } catch (error: any) {
-        update(state => ({
-          ...state,
-          loading: false,
-          error: error.message || '登录失败',
-        }));
+    async oauthLogin(provider: string, code: string): Promise<boolean> {
+      update((state) => ({ ...state, loading: true, error: null }));
+      const result = await loginWithOAuth(provider, code);
+      return applyAuthResult(result);
+    },
+
+    async logout(): Promise<void> {
+      const token = getPersistedToken();
+      if (token) {
+        await logoutSession(token);
       }
+
+      clearPersistedToken();
+      set(initialState);
     },
 
-    // 微信登录
-    async wechatLogin() {
-      // TODO: 实现微信登录
-    },
-
-    // 手机登录
-    async phoneLogin(phone: string, code: string) {
-      // TODO: 实现手机登录
-    },
-
-    // 邮箱注册
-    async emailRegister(email: string, password: string, code: string) {
-      // TODO: 实现邮箱注册
-    },
-
-    // 登出
-    async logout() {
-      try {
-        // TODO: 调用IPC登出接口
-        // await invoke('logout');
-      } catch (error) {
-        console.error('Logout error:', error);
-      } finally {
-        // 清除本地状态
-        localStorage.removeItem('auth_token');
-        set(initialState);
-      }
-    },
-
-    // 检查会话状态
-    async checkSession() {
-      const token = localStorage.getItem('auth_token');
+    async checkSession(): Promise<boolean> {
+      const token = getPersistedToken();
       if (!token) {
         set(initialState);
-        return;
+        return false;
       }
 
-      update(state => ({ ...state, loading: true }));
+      update((state) => ({ ...state, loading: true, error: null }));
+      const user = await validateSession(token);
 
-      try {
-        // TODO: 调用IPC验证会话接口
-        // const user = await invoke('validate_session', { token });
-
-        // 模拟验证成功
-        const mockUser: User = {
-          id: 'user-123',
-          email: 'user@example.com',
-          username: 'user',
-          role: 'user',
-          preferences: {},
-        };
-
-        set({
-          isAuthenticated: true,
-          user: mockUser,
-          token,
-          loading: false,
-          error: null,
-        });
-      } catch (error) {
-        // 会话无效，清除本地存储
-        localStorage.removeItem('auth_token');
+      if (!user) {
+        clearPersistedToken();
         set(initialState);
+        return false;
       }
+
+      set({
+        isAuthenticated: true,
+        user,
+        token,
+        loading: false,
+        error: null,
+      });
+
+      return true;
     },
 
-    // 更新用户信息
-    async updateUser(userData: Partial<User>) {
-      update(state => {
-        if (!state.user) return state;
+    updateUser(userData: Partial<UserInfo>): void {
+      update((state) => {
+        if (!state.user) {
+          return state;
+        }
 
         return {
           ...state,
           user: { ...state.user, ...userData },
         };
       });
-
-      try {
-        // TODO: 调用IPC更新用户信息接口
-        // await invoke('update_user', userData);
-      } catch (error) {
-        console.error('Update user error:', error);
-      }
     },
 
-    // 更新用户偏好
-    async updatePreferences(preferences: Record<string, any>) {
-      update(state => {
-        if (!state.user) return state;
-
-        return {
-          ...state,
-          user: {
-            ...state.user,
-            preferences: { ...state.user.preferences, ...preferences },
-          },
-        };
-      });
-
-      try {
-        // TODO: 调用IPC更新偏好接口
-        // await invoke('update_preferences', { preferences });
-      } catch (error) {
-        console.error('Update preferences error:', error);
-      }
-    },
-
-    // 清除错误
-    clearError() {
-      update(state => ({ ...state, error: null }));
+    clearError(): void {
+      update((state) => ({ ...state, error: null }));
     },
   };
 }
 
 export const authStore = createAuthStore();
 
-// 应用启动时检查会话
 if (typeof window !== 'undefined') {
-  authStore.checkSession();
+  void authStore.checkSession();
 }

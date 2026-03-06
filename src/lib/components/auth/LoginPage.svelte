@@ -1,50 +1,63 @@
-<script lang="ts">
-  import { invoke } from '@tauri-apps/api/core';
+﻿<script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  import { get } from 'svelte/store';
   import LoginForm from './LoginForm.svelte';
   import WechatQR from './WechatQR.svelte';
   import PhoneVerify from './PhoneVerify.svelte';
   import EmailRegister from './EmailRegister.svelte';
+  import { authStore } from '$lib/stores/auth.store';
 
-  export let onLoginSuccess: () => void;
+  const dispatch = createEventDispatcher<{ loginSuccess: undefined }>();
 
-  // 当前显示的登录方式
   let currentMethod: 'form' | 'wechat' | 'phone' | 'email' = 'form';
   let isLoading = false;
   let errorMessage = '';
 
-  function switchMethod(method: typeof currentMethod) {
+  function switchMethod(method: typeof currentMethod): void {
     currentMethod = method;
     errorMessage = '';
   }
 
-  async function handleEmailLogin(email: string, password: string) {
+  async function runAuth(action: () => Promise<boolean>, fallbackError: string): Promise<void> {
     isLoading = true;
     errorMessage = '';
 
-    try {
-      // TODO: 调用IPC登录接口
-      // const result = await invoke('login', { email, password });
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟API调用
+    const success = await action();
+    const state = get(authStore);
 
-      // 登录成功
-      onLoginSuccess();
-    } catch (error: any) {
-      errorMessage = error.message || '登录失败，请检查邮箱和密码';
-    } finally {
-      isLoading = false;
+    if (success && state.isAuthenticated) {
+      dispatch('loginSuccess');
+    } else {
+      errorMessage = state.error ?? fallbackError;
     }
+
+    isLoading = false;
   }
 
-  async function handleWechatLogin() {
-    // TODO: 微信扫码登录
+  async function handleEmailLogin(event: CustomEvent<{ email: string; password: string }>): Promise<void> {
+    const { email, password } = event.detail;
+    await runAuth(() => authStore.login(email, password), '登录失败，请检查邮箱和密码');
   }
 
-  async function handlePhoneLogin(phone: string, code: string) {
-    // TODO: 手机验证码登录
+  async function handleWechatLogin(event: CustomEvent<{ authCode: string }>): Promise<void> {
+    const { authCode } = event.detail;
+    await runAuth(() => authStore.wechatLogin(authCode), '微信登录失败');
   }
 
-  async function handleEmailRegister(email: string, password: string, code: string) {
-    // TODO: 邮箱注册
+  async function handlePhoneLogin(event: CustomEvent<{ phone: string; code: string }>): Promise<void> {
+    const { phone, code } = event.detail;
+    await runAuth(() => authStore.phoneLogin(phone, code), '手机验证码登录失败');
+  }
+
+  async function handleEmailRegister(event: CustomEvent<{ email: string; password: string; code: string }>): Promise<void> {
+    const { email, password, code } = event.detail;
+    await runAuth(() => authStore.emailRegister(email, password, code), '邮箱注册失败');
+  }
+
+  async function handleOAuthLogin(event: CustomEvent<{ provider: string }>): Promise<void> {
+    const { provider } = event.detail;
+    const mockOAuthCode = `${provider}-mock-code`;
+    await runAuth(() => authStore.oauthLogin(provider, mockOAuthCode), `${provider} 登录失败`);
   }
 </script>
 
@@ -52,7 +65,6 @@
   <div class="login-container">
     <div class="login-header">
       <div class="logo">
-        <i class="fas fa-gamepad"></i>
         <h1>GameCraft AI Studio</h1>
       </div>
       <p class="subtitle">AI协作式游戏生成工具</p>
@@ -65,13 +77,14 @@
           on:switchToWechat={() => switchMethod('wechat')}
           on:switchToPhone={() => switchMethod('phone')}
           on:switchToRegister={() => switchMethod('email')}
+          on:oauth={handleOAuthLogin}
           {isLoading}
           {errorMessage}
         />
       {:else if currentMethod === 'wechat'}
         <WechatQR
           on:back={() => switchMethod('form')}
-          on:success={onLoginSuccess}
+          on:submit={handleWechatLogin}
         />
       {:else if currentMethod === 'phone'}
         <PhoneVerify
@@ -105,32 +118,19 @@
   }
 
   .login-container {
-    background: rgba(30, 41, 59, 0.8);
+    background: rgba(30, 41, 59, 0.85);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 40px;
     width: 100%;
-    max-width: 400px;
+    max-width: 460px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
 
   .login-header {
     text-align: center;
     margin-bottom: 30px;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-
-  .logo i {
-    font-size: 32px;
-    color: #6d28d9;
   }
 
   .logo h1 {
@@ -146,6 +146,7 @@
     color: #cbd5e1;
     font-size: 14px;
     opacity: 0.8;
+    margin-top: 6px;
   }
 
   .login-content {

@@ -1,32 +1,45 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
   export let isLoading = false;
   export let errorMessage = '';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{
+    submit: { email: string; password: string };
+    switchToWechat: undefined;
+    switchToPhone: undefined;
+    switchToRegister: undefined;
+    oauth: { provider: string };
+  }>();
 
   let email = '';
   let password = '';
   let rememberMe = false;
 
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    if (!email || !password) return;
+  function handleSubmit(event: Event): void {
+    event.preventDefault();
+
+    if (!email || !password) {
+      return;
+    }
 
     dispatch('submit', { email, password });
   }
 
-  function handleWechatLogin() {
+  function handleWechatLogin(): void {
     dispatch('switchToWechat');
   }
 
-  function handlePhoneLogin() {
+  function handlePhoneLogin(): void {
     dispatch('switchToPhone');
   }
 
-  function handleRegister() {
+  function handleRegister(): void {
     dispatch('switchToRegister');
+  }
+
+  function handleOAuth(provider: string): void {
+    dispatch('oauth', { provider });
   }
 </script>
 
@@ -57,26 +70,23 @@
 
   {#if errorMessage}
     <div class="error-message">
-      <i class="fas fa-exclamation-circle"></i>
       <span>{errorMessage}</span>
     </div>
   {/if}
 
   <div class="form-options">
-    <label class="checkbox">
-      <input type="checkbox" bind:checked={rememberMe} disabled={isLoading} />
+    <label class="checkbox" for="rememberMe">
+      <input id="rememberMe" type="checkbox" bind:checked={rememberMe} disabled={isLoading} />
       <span>记住我</span>
     </label>
-    <a href="#" class="forgot-password">忘记密码？</a>
+    <button type="button" class="forgot-password">忘记密码？</button>
   </div>
 
   <button type="submit" class="login-button" disabled={isLoading}>
     {#if isLoading}
-      <i class="fas fa-spinner fa-spin"></i>
       登录中...
     {:else}
-      <i class="fas fa-sign-in-alt"></i>
-      登录
+      邮箱登录
     {/if}
   </button>
 
@@ -86,30 +96,26 @@
 
   <div class="social-login">
     <button type="button" class="social-button wechat" on:click={handleWechatLogin} disabled={isLoading}>
-      <i class="fab fa-weixin"></i>
       微信扫码登录
     </button>
 
     <button type="button" class="social-button phone" on:click={handlePhoneLogin} disabled={isLoading}>
-      <i class="fas fa-mobile-alt"></i>
       手机验证登录
     </button>
   </div>
 
   <div class="register-link">
     还没有账号？
-    <a href="#" on:click|preventDefault={handleRegister}>立即注册</a>
+    <button type="button" class="link-button" on:click={handleRegister}>立即注册</button>
   </div>
 
   <div class="third-party-login">
     <p>使用第三方账号登录：</p>
     <div class="third-party-buttons">
-      <button type="button" class="third-party-button github" disabled={isLoading}>
-        <i class="fab fa-github"></i>
+      <button type="button" class="third-party-button github" on:click={() => handleOAuth('github')} disabled={isLoading}>
         GitHub
       </button>
-      <button type="button" class="third-party-button google" disabled={isLoading}>
-        <i class="fab fa-google"></i>
+      <button type="button" class="third-party-button google" on:click={() => handleOAuth('google')} disabled={isLoading}>
         Google
       </button>
     </div>
@@ -160,19 +166,12 @@
   }
 
   .error-message {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     padding: 12px;
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 8px;
     color: #fca5a5;
     font-size: 14px;
-  }
-
-  .error-message i {
-    font-size: 16px;
   }
 
   .form-options {
@@ -197,6 +196,9 @@
   .forgot-password {
     color: #6d28d9;
     text-decoration: none;
+    border: none;
+    background: transparent;
+    padding: 0;
     transition: color 0.2s ease;
   }
 
@@ -214,10 +216,6 @@
     font-weight: 600;
     cursor: pointer;
     transition: opacity 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
   }
 
   .login-button:hover:not(:disabled) {
@@ -264,10 +262,6 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
   }
 
   .social-button:hover:not(:disabled) {
@@ -295,15 +289,18 @@
     margin-top: 10px;
   }
 
-  .register-link a {
+  .register-link .link-button {
     color: #6d28d9;
     text-decoration: none;
     font-weight: 600;
     margin-left: 5px;
+    border: none;
+    background: transparent;
+    padding: 0;
     transition: color 0.2s ease;
   }
 
-  .register-link a:hover {
+  .register-link .link-button:hover {
     color: #a855f7;
   }
 
@@ -335,10 +332,6 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
   }
 
   .third-party-button:hover:not(:disabled) {
