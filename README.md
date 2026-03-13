@@ -81,6 +81,10 @@ npm run tauri dev
 
 # 5. 构建发布版本
 npm run tauri build
+
+
+
+
 ```
 
 ### 开发工作流
@@ -131,10 +135,10 @@ gamecraft-ai-studio/
 
 ### AI提供商配置
 支持多厂商AI服务：
-- **OpenAI**: GPT-4, GPT-3.5 Turbo
+- **OpenAI**: GPT
 - **Anthropic**: Claude 3系列
-- **智谱AI**: GLM-4
-- **百度文心**: ERNIE 4.0
+- **智谱AI**: GLM
+- **deepseek**: ERNIE 4.0
 - **本地模型**: Ollama + Llama 3（隐私保护）
 
 ### 认证配置
@@ -143,22 +147,7 @@ gamecraft-ai-studio/
 - **邮箱验证**: SMTP服务
 - **第三方OAuth**: GitHub, Google
 
-## 📈 开发路线图
 
-### MVP阶段（0-3个月）
-- [x] 基础框架搭建（Tauri+Svelte+SQLite）
-- [ ] 多元登录系统（邮箱+GitHub OAuth）
-- [ ] AI集成（OpenAI）+ 简单内容生成
-
-### 增长阶段（4-9个月）
-- [ ] 完整认证系统（微信+手机验证）
-- [ ] 多AI提供商支持 + API统计面板
-- [ ] 完整AI协作画布（可视化编辑+多轮对话）
-
-### 稳定阶段（10-18个月）
-- [ ] 性能优化+动画系统完善
-- [ ] 社区功能+模板市场
-- [ ] 企业级功能（团队协作、高级统计）
 
 ## 🤝 贡献指南
 

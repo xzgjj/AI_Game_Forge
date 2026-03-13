@@ -89,6 +89,15 @@ fn main() {
             ipc::project::save_project,
             ipc::project::load_project,
             ipc::project::export_project,
+            // Unity Bridge
+            ipc::unity_bridge::unity_init_project,
+            ipc::unity_bridge::unity_inject_upm,
+            ipc::unity_bridge::unity_validate_project,
+            ipc::unity_bridge::unity_batch_validate,
+            // Wizard persistence
+            ipc::wizard::save_wizard_state,
+            ipc::wizard::load_latest_wizard_state,
+            ipc::wizard::load_wizard_state_by_project,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,0 +1,6 @@
+﻿CREATE TABLE IF NOT EXISTS wizard_states (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_root TEXT NOT NULL UNIQUE,
+  wizard_state TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
