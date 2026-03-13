@@ -8,6 +8,7 @@ pub mod ai_collab_service;
 pub mod user_service;
 pub mod audit_service;
 pub mod provider_manager;
+pub mod unity_bridge_service;
 
 use tauri::AppHandle;
 use anyhow::Result;

@@ -1,5 +1,156 @@
 # GameCraft AI Studio 关键代码修改记录
 
+## 2026-03-14 WizardState SQLite 持久化 + 加载入口
+
+### 涉及文件
+1. `src-tauri/migrations/202603140001_add_wizard_states/up.sql`
+2. `src-tauri/migrations/202603140001_add_wizard_states/down.sql`
+3. `src-tauri/src/ipc/wizard.rs`
+4. `src-tauri/src/ipc/mod.rs`
+5. `src-tauri/src/main.rs`
+6. `src/lib/services/wizard.service.ts`
+7. `src/lib/components/wizard/ConfigWizard.svelte`
+8. `src/lib/types/wizard.types.ts`
+
+### 核心 Diff 摘要
+- 新增 `wizard_states` 表迁移并使用 SQLite 存储 WizardState。
+- 增加 `load_latest_wizard_state` IPC 与前端“加载上次 WizardState”入口。
+- Step3/Step4 保存 WizardState 到 SQLite。
+
+### 修改意图
+1. 落地结构化产物数据库持久化。
+2. 提供恢复入口，支持断点续作。
+
+### 对项目的影响
+1. WizardState 可跨会话恢复，流程更可用。
+2. 依赖数据库迁移成功执行。
+
+## 2026-03-14 WizardState 按项目路径加载
+
+### 涉及文件
+1. `src-tauri/src/ipc/wizard.rs`
+2. `src-tauri/src/main.rs`
+3. `src/lib/services/wizard.service.ts`
+4. `src/lib/components/wizard/ConfigWizard.svelte`
+
+### 核心 Diff 摘要
+- 新增 `load_wizard_state_by_project` IPC 命令。\n- 前端增加“按路径加载”入口，按 `projectPath` 精确恢复 WizardState。
+
+### 修改意图
+1. 支持多项目并行恢复，减少误加载。\n2. 提升可用性与可控性。
+
+### 对项目的影响
+1. 持久化检索更精确，可按项目路径恢复。
+
+## 2026-03-13 配置向导升级为 8 步与 WizardState 结构化产物
+
+### 涉及文件
+1. `src/lib/components/wizard/ConfigWizard.svelte`
+2. `src/lib/types/wizard.types.ts`
+
+### 核心 Diff 摘要
+- ConfigWizard 从 6 步扩展为 8 步，并增加步骤校验与进度导航。
+- 新增 WizardState 结构化产物类型，覆盖 8 步核心字段。
+- 提供结构化产物实时预览，便于后续持久化与审计接入。
+
+### 修改意图
+1. 与 8 步流程标准对齐，确保 UI 与业务一致。
+2. 为 Unity Bridge 与 AI 生成管线提供结构化输入输出基础。
+
+### 对项目的影响
+1. 8 步流程在前端可视化落地，减少需求偏差。
+2. WizardState 成为后续存储、审计与导出 Unity 的核心数据结构。
+
+## 2026-03-13 Unity Bridge 最小闭环（模板 + UPM 注入 + 校验）
+
+### 涉及文件
+1. `src-tauri/src/services/unity_bridge_service.rs`
+2. `src-tauri/src/ipc/unity_bridge.rs`
+3. `src-tauri/src/ipc/mod.rs`
+4. `src-tauri/src/services/mod.rs`
+5. `src-tauri/src/main.rs`
+
+### 核心 Diff 摘要
+- 新增 Unity Bridge 服务：初始化 Unity 项目目录、生成基础场景与 manifest。
+- 新增 UPM 注入：创建本地包并写入 `Packages/manifest.json`。
+- 新增基础校验：检查关键文件并对 C# 脚本做静态检查。
+- 暴露 IPC 命令：`unity_init_project`、`unity_inject_upm`、`unity_validate_project`。
+
+### 修改意图
+1. 建立 Unity 对接最小闭环，保证“项目模板 + 脚本包 + 校验”可执行。
+2. 为后续 AI 生成脚本的自动导入与验证打基础。
+
+### 对项目的影响
+1. Unity Bridge 从空白变为可调用的最小实现。
+2. 校验仍为静态检查，需后续接入 Unity 实际编译验证。
+
+## 2026-03-13 Step3/Step4 前端接入 Unity Bridge
+
+### 涉及文件
+1. `src/lib/components/wizard/ConfigWizard.svelte`
+2. `src/lib/services/unity.service.ts`
+3. `src/lib/types/unity.types.ts`
+
+### 核心 Diff 摘要
+- Step3 绑定 Unity 初始化调用，Step4 绑定 UPM 注入与校验调用。
+- 新增 Unity IPC 调用封装与类型定义（前端层）。
+- 在向导中展示 Unity 对接状态与错误提示。
+
+### 修改意图
+1. 打通 Step3/Step4 的前端调用链路，确保流程可执行。
+2. 为后续脚本生成与导入提供最小验证闭环。
+
+### 对项目的影响
+1. 8 步流程在 UI 层具备 Unity 对接能力。
+2. 仍为静态校验，后续可升级至 BatchMode 编译验证。
+
+## 2026-03-13 Step3/Step4 持久化 + BatchMode 编译校验
+
+### 涉及文件
+1. `src-tauri/src/services/unity_bridge_service.rs`
+2. `src-tauri/src/ipc/unity_bridge.rs`
+3. `src-tauri/src/ipc/wizard.rs`
+4. `src-tauri/src/ipc/mod.rs`
+5. `src-tauri/src/main.rs`
+6. `src/lib/services/unity.service.ts`
+7. `src/lib/services/wizard.service.ts`
+8. `src/lib/types/unity.types.ts`
+9. `src/lib/types/wizard.types.ts`
+10. `src/lib/components/wizard/ConfigWizard.svelte`
+
+### 核心 Diff 摘要
+- 增加 Unity BatchMode 编译校验能力与 Editor 验证脚本注入。\n- Step3/Step4 保存 WizardState 到 `.aigameforge/wizard_state.json`。\n- 前端接入 BatchMode 校验开关与 Unity Editor 路径配置。
+
+### 修改意图
+1. 为核心流程增加真实编译校验能力（可选）。\n2. 在关键步骤落地结构化产物持久化。
+
+### 对项目的影响
+1. Step3/Step4 可落地本地持久化。\n2. BatchMode 校验依赖本机 Unity Editor 路径。
+
+## 2026-03-13 统一 8 步流程与 Unity 对接文档重写
+
+### 涉及文件
+1. `doc/AI_Game_Forge_Report.md`
+2. `CLAUDE.md`
+3. `notes.txt`
+4. `implementation_plan.md`
+5. `AGENT_EXECUTION_PROTOCOL.md`
+
+### 核心 Diff 摘要
+- 重写项目报告，固定 8 步流程并明确 Unity 对接策略。
+- 更新协作准则，强调文档与实现一致性、AI 生成范围与 Unity 约束。
+- 更新开发笔记，记录流程不对齐与 Unity 对接缺失的问题。
+- 新增实施计划与代理执行协议，落地执行规则与验收标准。
+
+### 修改意图
+1. 纠正流程定义偏差，明确“每一步一个页面”的 UI 结构。
+2. 强化 Unity 自动对接与脚本生成的硬性要求。
+3. 建立统一的执行与审计规范，避免文档虚高。
+
+### 对项目的影响
+1. 目标流程与实现方向被明确锁定，减少后续偏航风险。
+2. 文档与执行规范统一，便于团队协作与审计。
+
 ## 2026-03-06 创建项目协作准则和开发笔记系统
 
 ### 涉及文件

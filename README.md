@@ -81,6 +81,10 @@ npm run tauri dev
 
 # 5. 构建发布版本
 npm run tauri build
+
+
+
+
 ```
 
 ### 开发工作流
@@ -132,7 +136,7 @@ gamecraft-ai-studio/
 ### AI提供商配置
 支持多厂商AI服务：
 - **OpenAI**: GPT
-- **Anthropic**: Claude
+- **Anthropic**: Claude 3系列
 - **智谱AI**: GLM
 - **deepseek**: ERNIE 4.0
 - **本地模型**: Ollama + Llama 3（隐私保护）
@@ -142,10 +146,6 @@ gamecraft-ai-studio/
 - **短信服务**: 阿里云/腾讯云
 - **邮箱验证**: SMTP服务
 - **第三方OAuth**: GitHub, Google
-
-## 📈 开发路线图
-
-
 
 ## 🤝 贡献指南
 
@@ -186,4 +186,3 @@ gamecraft-ai-studio/
 ---
 
 *让创意成为游戏，让AI成为您的创作伙伴。* 🎮✨
-
