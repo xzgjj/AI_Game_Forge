@@ -9,7 +9,7 @@ use chrono::{Utc, Duration};
 
 use crate::models::user::User;
 use crate::models::auth_session::AuthSession;
-use crate::database::repository::Repository;
+use crate::database::repository::RepositoryManager;
 
 /// 认证提供商配置
 #[derive(Debug, Clone)]
@@ -64,8 +64,7 @@ pub struct AuthenticatedUser {
 /// 认证服务
 pub struct AuthService {
     providers: HashMap<String, Box<dyn AuthProvider>>,
-    user_repository: Arc<Repository>,
-    session_repository: Arc<Repository>,
+    repository_manager: Arc<RepositoryManager>,
     config: AuthServiceConfig,
 }
 
@@ -82,14 +81,12 @@ pub struct AuthServiceConfig {
 impl AuthService {
     /// 创建新的认证服务
     pub fn new(
-        user_repository: Arc<Repository>,
-        session_repository: Arc<Repository>,
+        repository_manager: Arc<RepositoryManager>,
         config: AuthServiceConfig,
     ) -> Self {
         Self {
             providers: HashMap::new(),
-            user_repository,
-            session_repository,
+            repository_manager,
             config,
         }
     }

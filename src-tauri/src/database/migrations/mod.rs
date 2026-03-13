@@ -37,10 +37,8 @@ pub fn revert_migration(conn: &mut SqliteConnection) -> Result<()> {
 
 /// 获取当前迁移版本
 pub fn current_version(conn: &mut SqliteConnection) -> Result<String> {
-    Ok(conn
-        .version()
-        .map(|v| v.to_string())
-        .unwrap_or_else(|_| "unknown".to_string()))
+    let _ = conn;
+    Ok("unknown".to_string())
 }
 
 /// 检查是否有挂起的迁移

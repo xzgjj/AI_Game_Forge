@@ -121,9 +121,9 @@ impl APIManagementService {
         let strategy = self.routing_strategy.read().unwrap().clone();
 
         match strategy {
-            RoutingStrategy::Manual(provider) => {
-                if self.providers.contains_key(&provider) {
-                    return Ok(provider);
+            RoutingStrategy::Manual(ref provider) => {
+                if self.providers.contains_key(provider.as_str()) {
+                    return Ok(provider.clone());
                 } else {
                     log::warn!("Manual provider {} not available, falling back", provider);
                 }

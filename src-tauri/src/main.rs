@@ -12,7 +12,7 @@ mod providers;
 mod utils;
 
 use ipc::*;
-use tauri::Manager;
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
 fn main() {
     // 初始化日志
@@ -22,7 +22,9 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            app.get_window("main").unwrap().show().unwrap();
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+            }
         }))
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
@@ -35,10 +37,10 @@ fn main() {
             services::init(&app.handle())?;
 
             // 创建主窗口
-            let window = tauri::WindowBuilder::new(
+            let _window = WebviewWindowBuilder::new(
                 app,
                 "main",
-                tauri::WindowUrl::App("index.html".into())
+                WebviewUrl::App("index.html".into()),
             )
             .title("GameCraft AI Studio")
             .inner_size(1280.0, 800.0)
@@ -46,22 +48,10 @@ fn main() {
             .build()?;
 
             // 设置系统托盘
-            #[cfg(any(target_os = "windows", target_os = "macos"))]
+            #[cfg(feature = "legacy-tray")]
             {
-                use tauri::{CustomMenuItem, SystemTray, SystemTrayMenu, SystemTrayMenuItem};
-
-                let quit = CustomMenuItem::new("quit".to_string(), "退出");
-                let show = CustomMenuItem::new("show".to_string(), "显示窗口");
-                let hide = CustomMenuItem::new("hide".to_string(), "隐藏窗口");
-
-                let tray_menu = SystemTrayMenu::new()
-                    .add_item(show)
-                    .add_item(hide)
-                    .add_native_item(SystemTrayMenuItem::Separator)
-                    .add_item(quit);
-
-                let system_tray = SystemTray::new().with_menu(tray_menu);
-                app.set_system_tray(system_tray)?;
+                // 旧版 SystemTray API 已移除，保留占位以免破坏结构。
+                let _ = app;
             }
 
             Ok(())

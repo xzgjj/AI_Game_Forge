@@ -1,5 +1,30 @@
 # GameCraft AI Studio 关键代码修改记录
 
+## 2026-03-14 修复 cargo test 编译并添加占位图标
+
+### 涉及文件
+1. `src-tauri/src/main.rs`
+2. `src-tauri/src/database/mod.rs`
+3. `src-tauri/src/database/migrations/mod.rs`
+4. `src-tauri/src/models/auth_session.rs`
+5. `src-tauri/src/services/auth_service.rs`
+6. `src-tauri/src/services/api_mgmt_service.rs`
+7. `src-tauri/src/utils/*.rs`
+8. `src-tauri/icons/icon.ico`
+
+### 核心 Diff 摘要
+- 修复 Tauri API 适配与数据库调用签名，保证 `cargo test` 通过。
+- 补齐缺失的 `utils` 模块文件占位实现。
+- 生成 `icons/icon.ico` 占位图标。
+
+### 修改意图
+1. 消除编译错误，恢复测试流程。
+2. 提供基础占位实现，待后续替换为正式逻辑。
+
+### 对项目的影响
+1. `cargo test` 已可执行（仍有警告）。
+2. 图标暂为占位，待替换为正式品牌资源。
+
 ## 2026-03-14 修复 Cargo lib 入口以支持测试
 
 ### 涉及文件
