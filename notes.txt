@@ -31,6 +31,8 @@
 5. Step3/Step4 增加本地持久化与可选 BatchMode 编译校验。
 6. WizardState 已写入 SQLite，并新增“加载上次 WizardState”入口。
 7. 新增按项目路径加载 WizardState 入口。
+8. 补齐 src-tauri/src/lib.rs，修复 cargo test 入口。
+9. 修复 Cargo 依赖配置（tauri feature 与 ollama-rs）。
 
 ## 中期优先级
 1. 角色/资源生成管线（Step5/6）

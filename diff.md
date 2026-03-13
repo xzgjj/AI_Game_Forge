@@ -1,5 +1,34 @@
 # GameCraft AI Studio 关键代码修改记录
 
+## 2026-03-14 修复 Cargo lib 入口以支持测试
+
+### 涉及文件
+1. `src-tauri/src/lib.rs`
+
+### 核心 Diff 摘要
+- 新增 `src-tauri/src/lib.rs`，补齐 Rust 库入口，支持 `cargo test`。
+
+### 修改意图
+1. 解决 Cargo 无法解析库入口的问题。
+
+### 对项目的影响
+1. Rust 测试与迁移验证可恢复执行。
+
+## 2026-03-14 修复 Cargo 依赖配置以便测试
+
+### 涉及文件
+1. `src-tauri/Cargo.toml`
+
+### 核心 Diff 摘要
+- 增加 `ollama-rs` 可选依赖，修复 feature 指向缺失依赖的问题。
+- 调整 `tauri` features，移除无效的 `api-all` 等配置。
+
+### 修改意图
+1. 让 `cargo test` 能正常解析依赖与特性。
+
+### 对项目的影响
+1. 测试配置更贴合当前 Tauri 2 特性集合。
+
 ## 2026-03-14 WizardState SQLite 持久化 + 加载入口
 
 ### 涉及文件
