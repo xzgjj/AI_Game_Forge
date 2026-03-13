@@ -1,5 +1,22 @@
 # GameCraft AI Studio 关键代码修改记录
 
+## 2026-03-14 使用真实 Logo 更新 Tauri 图标
+
+### 涉及文件
+1. `src-tauri/icons/icon.ico`
+2. `src-tauri/icons/icon.png`
+
+### 核心 Diff 摘要
+- 基于 `assets/logo.png` 生成多尺寸 `icon.ico`（16/32/48/64/128/256）。
+- 新增 `icon.png`（512x512）供 Tauri 使用。
+
+### 修改意图
+1. 用真实品牌视觉替换占位图标。
+2. 为后续打包提供可用图标资源。
+
+### 对项目的影响
+1. Tauri 构建与系统图标展示将使用真实 Logo（仍可随时替换）。
+
 ## 2026-03-14 修复 cargo test 编译并添加占位图标
 
 ### 涉及文件

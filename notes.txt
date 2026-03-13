@@ -34,6 +34,7 @@
 8. 补齐 src-tauri/src/lib.rs，修复 cargo test 入口。
 9. 修复 Cargo 依赖配置（tauri feature 与 ollama-rs）。
 10. 修复 `cargo test` 编译并添加占位图标（测试通过但有警告）。
+11. 使用 `assets/logo.png` 生成正式图标，更新 `src-tauri/icons/icon.ico` 与新增 `icon.png`。
 
 ## 中期优先级
 1. 角色/资源生成管线（Step5/6）
