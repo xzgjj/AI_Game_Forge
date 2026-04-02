@@ -31,6 +31,7 @@
 当前前端仍在从线性流程向工作台式页面过渡，因此 UI 设计和实现需要同步校验实际流转。
 
 设计协作基线见 [doc/figma_ui_spec.md](doc/figma_ui_spec.md)。
+逐页视觉和交互对照见 [doc/figma_page_review.md](doc/figma_page_review.md)。
 
 当前优先核对的设计范围：
 - 登录页的多入口分支与失败态

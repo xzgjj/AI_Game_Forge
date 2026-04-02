@@ -1,20 +1,21 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+<script lang="ts">
   import ProjectManager from '$lib/components/project/ProjectManager.svelte';
   import UserSettings from '$lib/components/settings/UserSettings.svelte';
   import APIStatsDashboard from '$lib/components/stats/APIStatsDashboard.svelte';
 
   type DashboardTab = 'overview' | 'projects' | 'settings' | 'stats';
 
-  const dispatch = createEventDispatcher<{
-    logout: undefined;
-    navigate: 'wizard' | 'canvas';
-  }>();
+  type Props = {
+    logout?: () => void;
+    navigate?: (route: 'wizard' | 'canvas') => void;
+  };
 
-  let activeTab: DashboardTab = 'overview';
+  let { logout, navigate }: Props = $props();
+
+  let activeTab: DashboardTab = $state('overview');
 
   function goTo(route: 'wizard' | 'canvas'): void {
-    dispatch('navigate', route);
+    navigate?.(route);
   }
 </script>
 
@@ -22,17 +23,17 @@
   <header class="topbar">
     <h2>GameCraft 控制台</h2>
     <div class="actions">
-      <button type="button" on:click={() => goTo('wizard')}>配置向导</button>
-      <button type="button" on:click={() => goTo('canvas')}>AI 画布</button>
-      <button type="button" class="danger" on:click={() => dispatch('logout')}>退出登录</button>
+      <button type="button" onclick={() => goTo('wizard')}>配置向导</button>
+      <button type="button" onclick={() => goTo('canvas')}>AI 画布</button>
+      <button type="button" class="danger" onclick={() => logout?.()}>退出登录</button>
     </div>
   </header>
 
   <nav class="tabs">
-    <button type="button" class:active={activeTab === 'overview'} on:click={() => (activeTab = 'overview')}>总览</button>
-    <button type="button" class:active={activeTab === 'projects'} on:click={() => (activeTab = 'projects')}>项目管理</button>
-    <button type="button" class:active={activeTab === 'settings'} on:click={() => (activeTab = 'settings')}>用户设置</button>
-    <button type="button" class:active={activeTab === 'stats'} on:click={() => (activeTab = 'stats')}>API统计</button>
+    <button type="button" class:active={activeTab === 'overview'} onclick={() => (activeTab = 'overview')}>总览</button>
+    <button type="button" class:active={activeTab === 'projects'} onclick={() => (activeTab = 'projects')}>项目管理</button>
+    <button type="button" class:active={activeTab === 'settings'} onclick={() => (activeTab = 'settings')}>用户设置</button>
+    <button type="button" class:active={activeTab === 'stats'} onclick={() => (activeTab = 'stats')}>API统计</button>
   </nav>
 
   <main>
@@ -48,7 +49,7 @@
         </article>
       </section>
     {:else if activeTab === 'projects'}
-      <ProjectManager on:open={() => goTo('wizard')} />
+      <ProjectManager open={() => goTo('wizard')} />
     {:else if activeTab === 'settings'}
       <UserSettings />
     {:else if activeTab === 'stats'}

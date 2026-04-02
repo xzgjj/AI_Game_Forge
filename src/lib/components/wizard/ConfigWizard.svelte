@@ -1,5 +1,4 @@
 ﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import type { WizardState, WizardStepId, WizardStepMeta } from '$lib/types/wizard.types';
   import type { UnityBatchValidateReport, UnityBridgeResult, UnityValidationReport } from '$lib/types/unity.types';
   import {
@@ -10,10 +9,12 @@
   } from '$lib/services/unity.service';
   import { loadLatestWizardState, loadWizardStateByProject, saveWizardState } from '$lib/services/wizard.service';
 
-  const dispatch = createEventDispatcher<{
-    complete: WizardState;
-    back: undefined;
-  }>();
+  type Props = {
+    complete?: (state: WizardState) => void;
+    back?: () => void;
+  };
+
+  let { complete, back }: Props = $props();
 
   const steps: WizardStepMeta[] = [
     { id: 'design', title: '游戏设计', subtitle: '明确玩法与方向' },
@@ -28,84 +29,81 @@
 
   const maxStepIndex = steps.length - 1;
 
-  let stepIndex = 0;
-  let validationError = '';
-  let bridgeBusy = false;
-  let bridgeMessage = '';
-  let bridgeError = '';
-  let initResult: UnityBridgeResult | null = null;
-  let upmResult: UnityBridgeResult | null = null;
-  let validationReport: UnityValidationReport | null = null;
-  let batchReport: UnityBatchValidateReport | null = null;
-  let persistMessage = '';
-  let loadMessage = '';
-  let loadError = '';
-  let loadBusy = false;
+  let stepIndex = $state(0);
+  let validationError = $state('');
+  let bridgeBusy = $state(false);
+  let bridgeMessage = $state('');
+  let bridgeError = $state('');
+  let initResult: UnityBridgeResult | null = $state(null);
+  let upmResult: UnityBridgeResult | null = $state(null);
+  let validationReport: UnityValidationReport | null = $state(null);
+  let batchReport: UnityBatchValidateReport | null = $state(null);
+  let persistMessage = $state('');
+  let loadMessage = $state('');
+  let loadError = $state('');
+  let loadBusy = $state(false);
 
   // Step 1
-  let gameTitle = '';
-  let genre = 'RPG';
-  let coreLoop = '';
-  let narrativeTone = 'Light';
-  let artStyle = 'Pixel';
-  let targetPlatforms: string[] = ['PC'];
-  let scopeNotes = '';
+  let gameTitle = $state('');
+  let genre = $state('RPG');
+  let coreLoop = $state('');
+  let narrativeTone = $state('Light');
+  let artStyle = $state('Pixel');
+  let targetPlatforms: string[] = $state(['PC']);
+  let scopeNotes = $state('');
 
   // Step 2
-  let systemModules = '';
-  let scriptStructure = '';
-  let stateMachineNotes = '';
-  let dataFlowNotes = '';
+  let systemModules = $state('');
+  let scriptStructure = $state('');
+  let stateMachineNotes = $state('');
+  let dataFlowNotes = $state('');
 
   // Step 3
-  let unityVersion = 'Unity 6 LTS';
-  let templatePreset = '3D URP';
-  let projectName = '';
-  let projectPath = '';
-  let sceneName = 'Main';
-  let useURP = true;
-  let useInputSystem = true;
-  let unityEditorPath = '';
-  let enableBatchValidation = false;
+  let unityVersion = $state('Unity 6 LTS');
+  let templatePreset = $state('3D URP');
+  let projectName = $state('');
+  let projectPath = $state('');
+  let sceneName = $state('Main');
+  let useURP = $state(true);
+  let useInputSystem = $state(true);
+  let unityEditorPath = $state('');
+  let enableBatchValidation = $state(false);
 
   // Step 4
-  let directGenerate: string[] = ['玩家控制', '敌人 AI', '碰撞检测', '状态机'];
-  let assistedGenerate: string[] = ['核心循环', '数值设计', '技能系统'];
-  let dialogueStyle = '短句、情绪化';
-  let portraitStyle = '统一风格立绘';
-  let scriptNotes = '';
+  let directGenerate: string[] = $state(['玩家控制', '敌人 AI', '碰撞检测', '状态机']);
+  let assistedGenerate: string[] = $state(['核心循环', '数值设计', '技能系统']);
+  let dialogueStyle = $state('短句、情绪化');
+  let portraitStyle = $state('统一风格立绘');
+  let scriptNotes = $state('');
 
   // Step 5
-  let playableCount = 1;
-  let enemyArchetypes = '';
-  let npcCount = 3;
-  let animationStyle = '关键帧 + 少量混合';
-  let voiceRequirement = '仅文本';
+  let playableCount = $state(1);
+  let enemyArchetypes = $state('');
+  let npcCount = $state(3);
+  let animationStyle = $state('关键帧 + 少量混合');
+  let voiceRequirement = $state('仅文本');
 
   // Step 6
-  let environmentStyle = '低饱和度幻想';
-  let uiTheme = '简洁科技';
-  let vfxStyle = '粒子轻量';
-  let audioStyle = '环境氛围 + 关键音效';
-  let assetNotes = '';
+  let environmentStyle = $state('低饱和度幻想');
+  let uiTheme = $state('简洁科技');
+  let vfxStyle = $state('粒子轻量');
+  let audioStyle = $state('环境氛围 + 关键音效');
+  let assetNotes = $state('');
 
   // Step 7
-  let iterationGoals = '';
-  let balanceTargets = '';
-  let skillAdjustments = '';
-  let playtestNotes = '';
+  let iterationGoals = $state('');
+  let balanceTargets = $state('');
+  let skillAdjustments = $state('');
+  let playtestNotes = $state('');
 
   // Step 8
-  let buildTargets: string[] = ['Windows'];
-  let versionTag = 'v0.1.0';
-  let releaseNotes = '';
-  let qaChecklist = '';
+  let buildTargets: string[] = $state(['Windows']);
+  let versionTag = $state('v0.1.0');
+  let releaseNotes = $state('');
+  let qaChecklist = $state('');
 
-  let currentStep: WizardStepMeta = steps[0];
-  let wizardState: WizardState = buildWizardState();
-
-  $: currentStep = steps[stepIndex];
-  $: wizardState = buildWizardState();
+  let currentStep: WizardStepMeta = $derived(steps[stepIndex]);
+  let wizardState: WizardState = $derived(buildWizardState());
 
   function buildWizardState(): WizardState {
     return {
@@ -308,7 +306,7 @@
           stepIndex += 1;
           return;
         }
-        dispatch('complete', wizardState);
+        complete?.(wizardState);
       })();
       return;
     }
@@ -324,7 +322,7 @@
           stepIndex += 1;
           return;
         }
-        dispatch('complete', wizardState);
+        complete?.(wizardState);
       })();
       return;
     }
@@ -334,14 +332,14 @@
       return;
     }
 
-    dispatch('complete', wizardState);
+    complete?.(wizardState);
   }
 
   function previousStep(): void {
     validationError = '';
 
     if (stepIndex === 0) {
-      dispatch('back');
+      back?.();
       return;
     }
 
@@ -459,10 +457,10 @@
       <p>Step {stepIndex + 1} / {steps.length} · {currentStep.title}</p>
     </div>
     <div class="header-actions">
-      <button type="button" on:click={loadLatestState} disabled={loadBusy}>
+      <button type="button" onclick={loadLatestState} disabled={loadBusy}>
         {loadBusy ? '加载中...' : '加载上次 WizardState'}
       </button>
-      <button type="button" on:click={loadByProjectPath} disabled={loadBusy}>
+      <button type="button" onclick={loadByProjectPath} disabled={loadBusy}>
         按路径加载
       </button>
     </div>
@@ -471,7 +469,7 @@
         <button
           type="button"
           class="step-chip {index === stepIndex ? 'active' : ''} {index < stepIndex ? 'done' : ''}"
-          on:click={() => (stepIndex = index)}
+          onclick={() => (stepIndex = index)}
         >
           <span class="chip-index">{index + 1}</span>
           <span class="chip-title">{step.title}</span>
@@ -547,7 +545,7 @@
                 <button
                   type="button"
                   class:active={targetPlatforms.includes(platform)}
-                  on:click={() => (targetPlatforms = toggleListItem(targetPlatforms, platform))}
+                  onclick={() => (targetPlatforms = toggleListItem(targetPlatforms, platform))}
                 >
                   {platform}
                 </button>
@@ -608,7 +606,7 @@
           <label>
             渲染管线
             <div class="toggle-row">
-              <button type="button" class:active={useURP} on:click={() => (useURP = !useURP)}>
+              <button type="button" class:active={useURP} onclick={() => (useURP = !useURP)}>
                 {useURP ? 'URP' : 'Built-in'}
               </button>
               <span>切换渲染管线</span>
@@ -617,7 +615,7 @@
           <label>
             新输入系统
             <div class="toggle-row">
-              <button type="button" class:active={useInputSystem} on:click={() => (useInputSystem = !useInputSystem)}>
+              <button type="button" class:active={useInputSystem} onclick={() => (useInputSystem = !useInputSystem)}>
                 {useInputSystem ? '启用' : '关闭'}
               </button>
               <span>Input System</span>
@@ -649,7 +647,7 @@
                 <button
                   type="button"
                   class:active={directGenerate.includes(item)}
-                  on:click={() => (directGenerate = toggleListItem(directGenerate, item))}
+                  onclick={() => (directGenerate = toggleListItem(directGenerate, item))}
                 >
                   {item}
                 </button>
@@ -663,7 +661,7 @@
                 <button
                   type="button"
                   class:active={assistedGenerate.includes(item)}
-                  on:click={() => (assistedGenerate = toggleListItem(assistedGenerate, item))}
+                  onclick={() => (assistedGenerate = toggleListItem(assistedGenerate, item))}
                 >
                   {item}
                 </button>
@@ -689,7 +687,7 @@
           <label class="full">
             BatchMode 编译校验
             <div class="toggle-row">
-              <button type="button" class:active={enableBatchValidation} on:click={() => (enableBatchValidation = !enableBatchValidation)}>
+              <button type="button" class:active={enableBatchValidation} onclick={() => (enableBatchValidation = !enableBatchValidation)}>
                 {enableBatchValidation ? '启用' : '关闭'}
               </button>
               <span>执行 Unity BatchMode 进行编译校验</span>
@@ -801,7 +799,7 @@
                 <button
                   type="button"
                   class:active={buildTargets.includes(platform)}
-                  on:click={() => (buildTargets = toggleListItem(buildTargets, platform))}
+                  onclick={() => (buildTargets = toggleListItem(buildTargets, platform))}
                 >
                   {platform}
                 </button>
@@ -834,8 +832,8 @@
   </div>
 
   <footer class="wizard-footer">
-    <button type="button" class="ghost" on:click={previousStep} disabled={bridgeBusy}>上一步</button>
-    <button type="button" class="primary" on:click={nextStep} disabled={bridgeBusy}>
+    <button type="button" class="ghost" onclick={previousStep} disabled={bridgeBusy}>上一步</button>
+    <button type="button" class="primary" onclick={nextStep} disabled={bridgeBusy}>
       {#if stepIndex === maxStepIndex}
         完成并进入画布
       {:else}

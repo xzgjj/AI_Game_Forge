@@ -1,20 +1,27 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+<script lang="ts">
+  type Props = {
+    isLoading?: boolean;
+    errorMessage?: string;
+    submit?: (payload: { email: string; password: string }) => void;
+    switchToWechat?: () => void;
+    switchToPhone?: () => void;
+    switchToRegister?: () => void;
+    oauth?: (payload: { provider: string }) => void;
+  };
 
-  export let isLoading = false;
-  export let errorMessage = '';
+  let {
+    isLoading = false,
+    errorMessage = '',
+    submit,
+    switchToWechat,
+    switchToPhone,
+    switchToRegister,
+    oauth,
+  }: Props = $props();
 
-  const dispatch = createEventDispatcher<{
-    submit: { email: string; password: string };
-    switchToWechat: undefined;
-    switchToPhone: undefined;
-    switchToRegister: undefined;
-    oauth: { provider: string };
-  }>();
-
-  let email = '';
-  let password = '';
-  let rememberMe = false;
+  let email = $state('');
+  let password = $state('');
+  let rememberMe = $state(false);
 
   function handleSubmit(event: Event): void {
     event.preventDefault();
@@ -23,27 +30,27 @@
       return;
     }
 
-    dispatch('submit', { email, password });
+    submit?.({ email, password });
   }
 
   function handleWechatLogin(): void {
-    dispatch('switchToWechat');
+    switchToWechat?.();
   }
 
   function handlePhoneLogin(): void {
-    dispatch('switchToPhone');
+    switchToPhone?.();
   }
 
   function handleRegister(): void {
-    dispatch('switchToRegister');
+    switchToRegister?.();
   }
 
   function handleOAuth(provider: string): void {
-    dispatch('oauth', { provider });
+    oauth?.({ provider });
   }
 </script>
 
-<form on:submit={handleSubmit} class="login-form">
+<form onsubmit={handleSubmit} class="login-form">
   <div class="form-group">
     <label for="email">邮箱地址</label>
     <input
@@ -95,27 +102,27 @@
   </div>
 
   <div class="social-login">
-    <button type="button" class="social-button wechat" on:click={handleWechatLogin} disabled={isLoading}>
+    <button type="button" class="social-button wechat" onclick={handleWechatLogin} disabled={isLoading}>
       微信扫码登录
     </button>
 
-    <button type="button" class="social-button phone" on:click={handlePhoneLogin} disabled={isLoading}>
+    <button type="button" class="social-button phone" onclick={handlePhoneLogin} disabled={isLoading}>
       手机验证登录
     </button>
   </div>
 
   <div class="register-link">
     还没有账号？
-    <button type="button" class="link-button" on:click={handleRegister}>立即注册</button>
+    <button type="button" class="link-button" onclick={handleRegister}>立即注册</button>
   </div>
 
   <div class="third-party-login">
     <p>使用第三方账号登录：</p>
     <div class="third-party-buttons">
-      <button type="button" class="third-party-button github" on:click={() => handleOAuth('github')} disabled={isLoading}>
+      <button type="button" class="third-party-button github" onclick={() => handleOAuth('github')} disabled={isLoading}>
         GitHub
       </button>
-      <button type="button" class="third-party-button google" on:click={() => handleOAuth('google')} disabled={isLoading}>
+      <button type="button" class="third-party-button google" onclick={() => handleOAuth('google')} disabled={isLoading}>
         Google
       </button>
     </div>

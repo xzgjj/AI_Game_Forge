@@ -1,5 +1,4 @@
 ﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import { get } from 'svelte/store';
   import LoginForm from './LoginForm.svelte';
   import WechatQR from './WechatQR.svelte';
@@ -7,11 +6,15 @@
   import EmailRegister from './EmailRegister.svelte';
   import { authStore } from '$lib/stores/auth.store';
 
-  const dispatch = createEventDispatcher<{ loginSuccess: undefined }>();
+  type Props = {
+    loginSuccess?: () => void;
+  };
 
-  let currentMethod: 'form' | 'wechat' | 'phone' | 'email' = 'form';
-  let isLoading = false;
-  let errorMessage = '';
+  let { loginSuccess }: Props = $props();
+
+  let currentMethod: 'form' | 'wechat' | 'phone' | 'email' = $state('form');
+  let isLoading = $state(false);
+  let errorMessage = $state('');
 
   function switchMethod(method: typeof currentMethod): void {
     currentMethod = method;
@@ -26,7 +29,7 @@
     const state = get(authStore);
 
     if (success && state.isAuthenticated) {
-      dispatch('loginSuccess');
+      loginSuccess?.();
     } else {
       errorMessage = state.error ?? fallbackError;
     }
@@ -34,28 +37,28 @@
     isLoading = false;
   }
 
-  async function handleEmailLogin(event: CustomEvent<{ email: string; password: string }>): Promise<void> {
-    const { email, password } = event.detail;
+  async function handleEmailLogin(payload: { email: string; password: string }): Promise<void> {
+    const { email, password } = payload;
     await runAuth(() => authStore.login(email, password), '登录失败，请检查邮箱和密码');
   }
 
-  async function handleWechatLogin(event: CustomEvent<{ authCode: string }>): Promise<void> {
-    const { authCode } = event.detail;
+  async function handleWechatLogin(payload: { authCode: string }): Promise<void> {
+    const { authCode } = payload;
     await runAuth(() => authStore.wechatLogin(authCode), '微信登录失败');
   }
 
-  async function handlePhoneLogin(event: CustomEvent<{ phone: string; code: string }>): Promise<void> {
-    const { phone, code } = event.detail;
+  async function handlePhoneLogin(payload: { phone: string; code: string }): Promise<void> {
+    const { phone, code } = payload;
     await runAuth(() => authStore.phoneLogin(phone, code), '手机验证码登录失败');
   }
 
-  async function handleEmailRegister(event: CustomEvent<{ email: string; password: string; code: string }>): Promise<void> {
-    const { email, password, code } = event.detail;
+  async function handleEmailRegister(payload: { email: string; password: string; code: string }): Promise<void> {
+    const { email, password, code } = payload;
     await runAuth(() => authStore.emailRegister(email, password, code), '邮箱注册失败');
   }
 
-  async function handleOAuthLogin(event: CustomEvent<{ provider: string }>): Promise<void> {
-    const { provider } = event.detail;
+  async function handleOAuthLogin(payload: { provider: string }): Promise<void> {
+    const { provider } = payload;
     const mockOAuthCode = `${provider}-mock-code`;
     await runAuth(() => authStore.oauthLogin(provider, mockOAuthCode), `${provider} 登录失败`);
   }
@@ -73,28 +76,28 @@
     <div class="login-content">
       {#if currentMethod === 'form'}
         <LoginForm
-          on:submit={handleEmailLogin}
-          on:switchToWechat={() => switchMethod('wechat')}
-          on:switchToPhone={() => switchMethod('phone')}
-          on:switchToRegister={() => switchMethod('email')}
-          on:oauth={handleOAuthLogin}
-          {isLoading}
-          {errorMessage}
+          submit={handleEmailLogin}
+          switchToWechat={() => switchMethod('wechat')}
+          switchToPhone={() => switchMethod('phone')}
+          switchToRegister={() => switchMethod('email')}
+          oauth={handleOAuthLogin}
+          isLoading={isLoading}
+          errorMessage={errorMessage}
         />
       {:else if currentMethod === 'wechat'}
         <WechatQR
-          on:back={() => switchMethod('form')}
-          on:submit={handleWechatLogin}
+          back={() => switchMethod('form')}
+          submit={handleWechatLogin}
         />
       {:else if currentMethod === 'phone'}
         <PhoneVerify
-          on:back={() => switchMethod('form')}
-          on:submit={handlePhoneLogin}
+          back={() => switchMethod('form')}
+          submit={handlePhoneLogin}
         />
       {:else if currentMethod === 'email'}
         <EmailRegister
-          on:back={() => switchMethod('form')}
-          on:submit={handleEmailRegister}
+          back={() => switchMethod('form')}
+          submit={handleEmailRegister}
         />
       {/if}
 

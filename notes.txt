@@ -4,9 +4,22 @@
 ## 2026-04-02 设计协作与用户流补齐
 1. **当前前端流转已补齐**：登录 -> 仪表盘 -> 配置向导 -> AI 画布 -> 返回仪表盘。
 2. **Figma 设计协作基线已新增**：`doc/figma_ui_spec.md` 作为页面设计、反馈和验证点的统一参考。
-3. **项目文档需要同步**：`README.md`、`notes.txt`、`diff.md` 已被更新以反映新的设计协作入口。
-4. **后续协作原则**：先按文档核对页面和流转，再决定是否继续把当前 4 页工作台扩展回完整 5 页工作台。
-5. **历史产品定义保留**：旧的 5 页 / 8 阶段定义继续保留在 `implementation_plan.md` 与历史记录中，避免丢失产品语义。
+3. **逐页对照清单已新增**：`doc/figma_page_review.md` 作为登录、仪表盘、配置向导和 AI 画布的逐页视觉/交互验收清单。
+4. **项目文档需要同步**：`README.md`、`notes.txt`、`diff.md` 已被更新以反映新的设计协作入口。
+5. **后续协作原则**：先按文档核对页面和流转，再决定是否继续把当前 4 页工作台扩展回完整 5 页工作台。
+6. **历史产品定义保留**：旧的 5 页 / 8 阶段定义继续保留在 `implementation_plan.md` 与历史记录中，避免丢失产品语义。
+
+## 2026-04-02 处理 ESLint 警告与 flat config 缺失
+1. **问题定位**：`npm run lint` 失败的根因是 ESLint 9 缺少 `eslint.config.js`，不是业务代码本身报错。
+2. **处理原则**：先恢复 lint 基础设施，再看代码级警告，避免在配置缺失时误判大量噪音。
+3. **落地结果**：新增 `eslint.config.js`，接入 flat config、Svelte、TypeScript 和浏览器/Node 全局变量配置。
+4. **验证结果**：`npm run lint` 与 `npm run check` 均已恢复正常。
+
+## 2026-04-02 处理 330 个 Svelte 警告
+1. **问题定位**：大量警告来自 Svelte 5 迁移后的旧语法混用，包括 `on:` 事件、`createEventDispatcher`、`export let`、未使用 `$state` 的本地状态，以及 `ConfigWizard` 里的 `legacy reactive statement`。
+2. **处理原则**：按 Svelte 5 官方迁移方式统一处理，优先迁移事件和响应式状态，而不是压制警告。
+3. **落地结果**：将组件事件改为 callback props、DOM 事件改为 `onclick/onsubmit`、本地可变状态改为 `$state`，并将 `ConfigWizard` 的 `$:` 改为 `$derived`。
+4. **验证结果**：`npm run check`、`npm run lint`、`npm run build` 已全部通过，Svelte 警告清零。
 
 ## 当前状态审查（新规划对齐）
 1. **用户页面已重新定义**：前台不是线性 8 步向导，而是 5 个用户页面，分别承载新建项目、资源导入、内容画布、协作优化和发布版本记录。

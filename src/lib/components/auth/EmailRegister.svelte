@@ -1,22 +1,22 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+<script lang="ts">
+  type Props = {
+    back?: () => void;
+    submit?: (payload: { email: string; password: string; code: string }) => void;
+  };
 
-  const dispatch = createEventDispatcher<{
-    back: undefined;
-    submit: { email: string; password: string; code: string };
-  }>();
+  let { back, submit }: Props = $props();
 
-  let email = '';
-  let password = '';
-  let code = '';
+  let email = $state('');
+  let password = $state('');
+  let code = $state('');
 
   function handleSubmit(event: Event): void {
     event.preventDefault();
-    dispatch('submit', { email, password, code });
+    submit?.({ email, password, code });
   }
 </script>
 
-<form class="panel" on:submit={handleSubmit}>
+<form class="panel" onsubmit={handleSubmit}>
   <h2>邮箱注册</h2>
   <p>输入邮箱、密码和验证码后创建账号。</p>
 
@@ -26,7 +26,7 @@
 
   <div class="actions">
     <button type="submit" class="primary">注册并登录</button>
-    <button type="button" on:click={() => dispatch('back')}>返回</button>
+    <button type="button" onclick={() => back?.()}>返回</button>
   </div>
 </form>
 
