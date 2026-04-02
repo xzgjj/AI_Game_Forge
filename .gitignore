@@ -149,8 +149,12 @@ pnpm-lock.yaml
 
 # 用户指定不上传的文件
 AI_Game_Forge_Report.md
+doc/web_ux_review.md
 GameCraft_AI_Studio_Architecture_Report.md
 模块功能清单.md
+!doc/AI_Game_Forge_Report.md
+!doc/web_ux_review.md
+!doc/figma_ui_spec.md
 /build/
 /bin/
 /.claude/

@@ -9,8 +9,8 @@
 
   type AppPage = 'login' | 'dashboard' | 'wizard' | 'canvas';
 
-  let currentPage: AppPage = 'login';
-  let isLoading = true;
+  let currentPage: AppPage = $state('login');
+  let isLoading = $state(true);
 
   onMount(async () => {
     const isAuthenticated = await authStore.checkSession();
@@ -27,8 +27,8 @@
     currentPage = 'login';
   }
 
-  function navigateTo(event: CustomEvent<'wizard' | 'canvas'>): void {
-    currentPage = event.detail;
+  function navigateTo(page: 'wizard' | 'canvas'): void {
+    currentPage = page;
   }
 </script>
 
@@ -44,13 +44,13 @@
     </div>
   {:else}
     {#if currentPage === 'login'}
-      <LoginPage on:loginSuccess={handleLoginSuccess} />
+      <LoginPage loginSuccess={handleLoginSuccess} />
     {:else if currentPage === 'dashboard'}
-      <Dashboard on:logout={handleLogout} on:navigate={navigateTo} />
+      <Dashboard logout={handleLogout} navigate={navigateTo} />
     {:else if currentPage === 'wizard'}
-      <ConfigWizard on:complete={() => (currentPage = 'canvas')} on:back={() => (currentPage = 'dashboard')} />
+      <ConfigWizard complete={() => (currentPage = 'canvas')} back={() => (currentPage = 'dashboard')} />
     {:else if currentPage === 'canvas'}
-      <AICanvas on:back={() => (currentPage = 'dashboard')} />
+      <AICanvas back={() => (currentPage = 'dashboard')} />
     {/if}
   {/if}
 </div>

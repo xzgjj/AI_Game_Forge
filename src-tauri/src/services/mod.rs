@@ -1,17 +1,17 @@
 //! 服务模块
 //! 包含所有业务逻辑服务
 
-pub mod auth_service;
-pub mod api_mgmt_service;
-pub mod game_config_service;
 pub mod ai_collab_service;
-pub mod user_service;
+pub mod api_mgmt_service;
 pub mod audit_service;
+pub mod auth_service;
+pub mod game_config_service;
 pub mod provider_manager;
 pub mod unity_bridge_service;
+pub mod user_service;
 
-use tauri::AppHandle;
 use anyhow::Result;
+use tauri::AppHandle;
 
 /// 初始化所有服务
 pub fn init(_app: &AppHandle) -> Result<()> {

@@ -1,10 +1,10 @@
 //! AI提供商模块
 //! 定义AI提供商的统一接口和具体实现
 
+use anyhow::Result;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use anyhow::Result;
 
 /// AI生成请求
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,12 +34,12 @@ pub struct AIGenerationResponse {
 /// 生成内容类型
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ContentType {
-    Character,   // 角色设计
-    Scene,       // 场景描述
-    Dialogue,    // 对话台词
-    Item,        // 物品描述
-    Quest,       // 任务设计
-    Mechanism,   // 机制设计
+    Character,     // 角色设计
+    Scene,         // 场景描述
+    Dialogue,      // 对话台词
+    Item,          // 物品描述
+    Quest,         // 任务设计
+    Mechanism,     // 机制设计
     Other(String), // 其他类型
 }
 
@@ -95,16 +95,16 @@ pub struct ProviderStats {
 }
 
 // 重新导出具体提供商实现
-#[cfg(feature = "openai")]
-pub mod openai;
-#[cfg(feature = "claude")]
-pub mod claude;
-#[cfg(feature = "zhipu")]
-pub mod zhipu;
 #[cfg(feature = "baidu")]
 pub mod baidu;
+#[cfg(feature = "claude")]
+pub mod claude;
 #[cfg(feature = "local")]
 pub mod local;
+#[cfg(feature = "openai")]
+pub mod openai;
+#[cfg(feature = "zhipu")]
+pub mod zhipu;
 
 /// 提供商工厂
 pub struct ProviderFactory;

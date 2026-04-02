@@ -1,6 +1,4 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-
+<script lang="ts">
   interface ProjectItem {
     id: string;
     name: string;
@@ -8,12 +6,16 @@
     version: string;
   }
 
-  const dispatch = createEventDispatcher<{ open: { projectId: string } }>();
+  type Props = {
+    open?: (projectId: string) => void;
+  };
 
-  let projects: ProjectItem[] = [
+  let { open }: Props = $props();
+
+  let projects: ProjectItem[] = $state([
     { id: 'p-001', name: '赛博朋克解谜', updatedAt: '2026-03-06 17:10', version: 'v12' },
     { id: 'p-002', name: '像素RPG Demo', updatedAt: '2026-03-05 20:40', version: 'v7' },
-  ];
+  ]);
 
   function createProject(): void {
     const nextId = `p-${projects.length + 1}`;
@@ -32,7 +34,7 @@
 <section class="panel">
   <header>
     <h3>项目管理器</h3>
-    <button type="button" on:click={createProject}>新建项目</button>
+    <button type="button" onclick={createProject}>新建项目</button>
   </header>
 
   <ul>
@@ -42,7 +44,7 @@
           <strong>{project.name}</strong>
           <small>{project.updatedAt} · {project.version}</small>
         </div>
-        <button type="button" on:click={() => dispatch('open', { projectId: project.id })}>打开</button>
+        <button type="button" onclick={() => open?.(project.id)}>打开</button>
       </li>
     {/each}
   </ul>

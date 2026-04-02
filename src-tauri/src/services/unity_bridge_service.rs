@@ -1,4 +1,4 @@
-﻿use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -100,7 +100,10 @@ impl UnityBridgeService {
             created.push(project_version_path.display().to_string());
         }
 
-        let scene_file = scenes_dir.join(format!("{}.unity", sanitize_scene_name(&request.scene_name)));
+        let scene_file = scenes_dir.join(format!(
+            "{}.unity",
+            sanitize_scene_name(&request.scene_name)
+        ));
         if !scene_file.exists() {
             fs::write(&scene_file, default_scene_content(&request.scene_name))?;
             created.push(scene_file.display().to_string());
@@ -190,7 +193,10 @@ impl UnityBridgeService {
             .ok_or_else(|| anyhow!("manifest.json 格式错误，缺少 dependencies"))?;
 
         let package_entry = format!("file:Packages/{}", package_name);
-        let previous = dependencies.insert(package_name.clone(), serde_json::Value::String(package_entry));
+        let previous = dependencies.insert(
+            package_name.clone(),
+            serde_json::Value::String(package_entry),
+        );
         if previous.is_some() {
             warnings.push("UPM 包已存在，已更新为本地路径。".to_string());
         }
@@ -207,7 +213,10 @@ impl UnityBridgeService {
         })
     }
 
-    pub fn validate_project(&self, request: UnityValidationRequest) -> Result<UnityValidationReport> {
+    pub fn validate_project(
+        &self,
+        request: UnityValidationRequest,
+    ) -> Result<UnityValidationReport> {
         let project_root = PathBuf::from(request.project_root.trim());
         ensure_project_root(&project_root)?;
 
@@ -215,7 +224,9 @@ impl UnityBridgeService {
         let mut warnings = Vec::new();
         let mut checked_files = Vec::new();
 
-        let settings = project_root.join("ProjectSettings").join("ProjectVersion.txt");
+        let settings = project_root
+            .join("ProjectSettings")
+            .join("ProjectVersion.txt");
         if !settings.exists() {
             errors.push("缺少 ProjectSettings/ProjectVersion.txt".to_string());
         } else {
@@ -228,7 +239,9 @@ impl UnityBridgeService {
         } else {
             checked_files.push(manifest_path.display().to_string());
             if request.require_package {
-                if let Ok(manifest) = serde_json::from_slice::<serde_json::Value>(&fs::read(&manifest_path)?) {
+                if let Ok(manifest) =
+                    serde_json::from_slice::<serde_json::Value>(&fs::read(&manifest_path)?)
+                {
                     if let Some(deps) = manifest.get("dependencies") {
                         let has_pkg = deps
                             .as_object()
@@ -243,10 +256,8 @@ impl UnityBridgeService {
         }
 
         let package_dir = project_root.join("Packages").join(DEFAULT_PACKAGE_NAME);
-        if request.require_package {
-            if !package_dir.exists() {
-                errors.push("缺少 Packages/com.aigameforge.core".to_string());
-            }
+        if request.require_package && !package_dir.exists() {
+            errors.push("缺少 Packages/com.aigameforge.core".to_string());
         }
 
         if package_dir.exists() {
@@ -278,7 +289,10 @@ impl UnityBridgeService {
         })
     }
 
-    pub fn batch_validate_project(&self, request: UnityBatchValidateRequest) -> Result<UnityBatchValidateReport> {
+    pub fn batch_validate_project(
+        &self,
+        request: UnityBatchValidateRequest,
+    ) -> Result<UnityBatchValidateReport> {
         let project_root = PathBuf::from(request.project_root.trim());
         ensure_project_root(&project_root)?;
 
@@ -287,7 +301,10 @@ impl UnityBridgeService {
             return Err(anyhow!("Unity Editor 路径不能为空"));
         }
         if !editor_path.exists() {
-            return Err(anyhow!("Unity Editor 路径不存在: {}", editor_path.display()));
+            return Err(anyhow!(
+                "Unity Editor 路径不存在: {}",
+                editor_path.display()
+            ));
         }
 
         let logs_dir = project_root.join("Logs");
@@ -320,6 +337,12 @@ impl UnityBridgeService {
             log_tail,
             warnings: Vec::new(),
         })
+    }
+}
+
+impl Default for UnityBridgeService {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

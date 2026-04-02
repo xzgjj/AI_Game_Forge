@@ -1,18 +1,18 @@
 //! 项目模型
 //! 定义项目数据结构和相关功能
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// 项目状态
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ProjectStatus {
-    Draft,      // 草稿
-    Active,     // 活跃
-    Archived,   // 已归档
-    Exported,   // 已导出
-    Deleted,    // 已删除
+    Draft,    // 草稿
+    Active,   // 活跃
+    Archived, // 已归档
+    Exported, // 已导出
+    Deleted,  // 已删除
 }
 
 /// 项目模型
@@ -37,11 +37,7 @@ pub struct Project {
 
 impl Project {
     /// 创建新项目
-    pub fn new(
-        user_id: Uuid,
-        name: String,
-        description: Option<String>,
-    ) -> Self {
+    pub fn new(user_id: Uuid, name: String, description: Option<String>) -> Self {
         let now = Utc::now();
 
         Self {

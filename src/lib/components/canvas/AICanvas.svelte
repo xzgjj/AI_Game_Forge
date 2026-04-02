@@ -1,11 +1,13 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+<script lang="ts">
+  type Props = {
+    back?: () => void;
+  };
 
-  const dispatch = createEventDispatcher<{ back: undefined }>();
+  let { back }: Props = $props();
 
-  let prompt = '';
-  let generatedContent = '等待生成...';
-  let versions: string[] = [];
+  let prompt = $state('');
+  let generatedContent = $state('等待生成...');
+  let versions: string[] = $state([]);
 
   function generate(): void {
     if (!prompt.trim()) {
@@ -21,14 +23,14 @@
 <section class="canvas">
   <header>
     <h2>AI 协作画布</h2>
-    <button type="button" on:click={() => dispatch('back')}>返回仪表盘</button>
+    <button type="button" onclick={() => back?.()}>返回仪表盘</button>
   </header>
 
   <div class="layout">
     <article>
       <h3>输入区</h3>
       <textarea bind:value={prompt} rows="5" placeholder="描述角色、场景、动作和台词..."></textarea>
-      <button type="button" class="primary" on:click={generate}>生成内容</button>
+      <button type="button" class="primary" onclick={generate}>生成内容</button>
     </article>
 
     <article>

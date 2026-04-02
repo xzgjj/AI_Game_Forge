@@ -2,16 +2,22 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
+#![allow(
+    dead_code,
+    unused_imports,
+    unused_variables,
+    unexpected_cfgs,
+    ambiguous_glob_reexports
+)]
 
 // IPC模块
-mod ipc;
-mod services;
-mod models;
 mod database;
+mod ipc;
+mod models;
 mod providers;
+mod services;
 mod utils;
 
-use ipc::*;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
 fn main() {
@@ -31,21 +37,18 @@ fn main() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             // 初始化数据库
-            database::init(&app.handle())?;
+            database::init(app.handle())?;
 
             // 初始化服务
-            services::init(&app.handle())?;
+            services::init(app.handle())?;
 
             // 创建主窗口
-            let _window = WebviewWindowBuilder::new(
-                app,
-                "main",
-                WebviewUrl::App("index.html".into()),
-            )
-            .title("GameCraft AI Studio")
-            .inner_size(1280.0, 800.0)
-            .min_inner_size(1024.0, 768.0)
-            .build()?;
+            let _window =
+                WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+                    .title("GameCraft AI Studio")
+                    .inner_size(1280.0, 800.0)
+                    .min_inner_size(1024.0, 768.0)
+                    .build()?;
 
             // 设置系统托盘
             #[cfg(feature = "legacy-tray")]

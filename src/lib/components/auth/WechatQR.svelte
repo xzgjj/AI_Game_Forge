@@ -1,15 +1,15 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+<script lang="ts">
+  type Props = {
+    back?: () => void;
+    submit?: (payload: { authCode: string }) => void;
+  };
 
-  const dispatch = createEventDispatcher<{
-    back: undefined;
-    submit: { authCode: string };
-  }>();
+  let { back, submit }: Props = $props();
 
-  let authCode = 'wechat-mock-auth-code';
+  let authCode = $state('wechat-mock-auth-code');
 
   function handleSubmit(): void {
-    dispatch('submit', { authCode });
+    submit?.({ authCode });
   }
 </script>
 
@@ -24,8 +24,8 @@
   <input type="text" bind:value={authCode} placeholder="输入授权码（测试）" />
 
   <div class="actions">
-    <button type="button" class="primary" on:click={handleSubmit}>完成登录</button>
-    <button type="button" on:click={() => dispatch('back')}>返回</button>
+    <button type="button" class="primary" onclick={handleSubmit}>完成登录</button>
+    <button type="button" onclick={() => back?.()}>返回</button>
   </div>
 </div>
 

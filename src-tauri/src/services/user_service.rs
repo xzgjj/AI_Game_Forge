@@ -14,3 +14,9 @@ impl UserService {
         Self {}
     }
 }
+
+impl Default for UserService {
+    fn default() -> Self {
+        Self::new()
+    }
+}

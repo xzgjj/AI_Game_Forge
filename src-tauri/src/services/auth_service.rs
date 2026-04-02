@@ -1,15 +1,15 @@
 //! 认证服务模块
 //! 处理多元认证系统的业务逻辑
 
+use anyhow::{anyhow, Result};
+use chrono::{Duration, Utc};
 use std::collections::HashMap;
 use std::sync::Arc;
-use anyhow::{Result, anyhow};
 use uuid::Uuid;
-use chrono::{Utc, Duration};
 
-use crate::models::user::User;
-use crate::models::auth_session::AuthSession;
 use crate::database::repository::RepositoryManager;
+use crate::models::auth_session::AuthSession;
+use crate::models::user::User;
 
 /// 认证提供商配置
 #[derive(Debug, Clone)]
@@ -80,10 +80,7 @@ pub struct AuthServiceConfig {
 
 impl AuthService {
     /// 创建新的认证服务
-    pub fn new(
-        repository_manager: Arc<RepositoryManager>,
-        config: AuthServiceConfig,
-    ) -> Self {
+    pub fn new(repository_manager: Arc<RepositoryManager>, config: AuthServiceConfig) -> Self {
         Self {
             providers: HashMap::new(),
             repository_manager,
@@ -156,7 +153,11 @@ impl AuthService {
     }
 
     /// 第三方OAuth登录
-    pub async fn oauth_login(&self, provider: &str, auth_code: String) -> Result<AuthenticatedUser> {
+    pub async fn oauth_login(
+        &self,
+        provider: &str,
+        auth_code: String,
+    ) -> Result<AuthenticatedUser> {
         log::info!("OAuth login attempt with provider: {}", provider);
 
         if let Some(provider_impl) = self.providers.get(provider) {

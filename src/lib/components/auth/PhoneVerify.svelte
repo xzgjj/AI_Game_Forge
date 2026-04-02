@@ -1,21 +1,21 @@
-﻿<script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+<script lang="ts">
+  type Props = {
+    back?: () => void;
+    submit?: (payload: { phone: string; code: string }) => void;
+  };
 
-  const dispatch = createEventDispatcher<{
-    back: undefined;
-    submit: { phone: string; code: string };
-  }>();
+  let { back, submit }: Props = $props();
 
-  let phone = '';
-  let code = '';
+  let phone = $state('');
+  let code = $state('');
 
   function handleSubmit(event: Event): void {
     event.preventDefault();
-    dispatch('submit', { phone, code });
+    submit?.({ phone, code });
   }
 </script>
 
-<form class="panel" on:submit={handleSubmit}>
+<form class="panel" onsubmit={handleSubmit}>
   <h2>手机号验证登录</h2>
   <p>输入手机号和验证码完成登录。</p>
 
@@ -24,7 +24,7 @@
 
   <div class="actions">
     <button type="submit" class="primary">登录</button>
-    <button type="button" on:click={() => dispatch('back')}>返回</button>
+    <button type="button" onclick={() => back?.()}>返回</button>
   </div>
 </form>
 

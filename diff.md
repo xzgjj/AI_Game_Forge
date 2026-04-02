@@ -1,6 +1,125 @@
 # GameCraft AI Studio 关键代码修改记录
 
+## 2026-04-02 Svelte 5 警告清零与 runes 迁移
 
+### 涉及文件
+1. `src/lib/App.svelte`
+2. `src/lib/components/auth/LoginPage.svelte`
+3. `src/lib/components/auth/LoginForm.svelte`
+4. `src/lib/components/auth/WechatQR.svelte`
+5. `src/lib/components/auth/PhoneVerify.svelte`
+6. `src/lib/components/auth/EmailRegister.svelte`
+7. `src/lib/components/dashboard/Dashboard.svelte`
+8. `src/lib/components/project/ProjectManager.svelte`
+9. `src/lib/components/canvas/AICanvas.svelte`
+10. `src/lib/components/wizard/ConfigWizard.svelte`
+11. `notes.txt`
+
+### 核心 Diff 摘要
+- 将旧的 Svelte 4 事件模型迁移为 Svelte 5 callback props 和 DOM `onclick/onsubmit`。
+- 将各页面本地可变状态迁移为 `$state`，把 `ConfigWizard` 的 `$:` 改为 `$derived`。
+- 清理 `createEventDispatcher`、`export let` 和 legacy reactive statement，消除批量编译警告。
+- 在开发笔记中记录这次迁移的根因和处理原则，避免后续再回退到旧语法。
+
+### 修改意图
+1. 从根上消除 IDE 中成批出现的 Svelte 警告，而不是遮蔽它们。
+2. 让当前代码真正符合 Svelte 5 的响应式和事件模型。
+
+### 对项目的影响
+1. `npm run check`、`npm run lint`、`npm run build` 全部恢复通过。
+2. 组件间事件和本地状态的写法统一，后续维护成本更低。
+
+## 2026-04-02 ESLint 9 flat config 恢复
+
+### 涉及文件
+1. `eslint.config.js`
+2. `notes.txt`
+
+### 核心 Diff 摘要
+- 为 ESLint 9 新增 flat config，补齐 `@eslint/js`、`eslint-plugin-svelte`、`@typescript-eslint/eslint-plugin`、`@typescript-eslint/parser` 和浏览器/Node 全局配置。
+- 恢复 `npm run lint` 的可执行性，避免 IDE 和命令行持续报“找不到 eslint.config.js”。
+- 在开发笔记中记录处理原则：先修 lint 基础设施，再看业务代码警告。
+
+### 修改意图
+1. 让警告处理有一个可持续的 lint 基线。
+2. 避免把配置缺失误判成大量代码问题。
+
+### 对项目的影响
+1. ESLint 可以正常跑通，后续代码警告能被真实定位。
+2. Svelte + TypeScript + Node/Browser 环境现在在同一份配置下工作。
+
+
+
+## 2026-04-02 UI 设计协作基线与用户流修正
+
+### 涉及文件
+1. `src/lib/components/dashboard/Dashboard.svelte`
+2. `src/lib/components/wizard/ConfigWizard.svelte`
+3. `doc/figma_ui_spec.md`
+4. `doc/figma_page_review.md`
+5. `README.md`
+6. `notes.txt`
+
+### 核心 Diff 摘要
+- 补齐登录 -> 仪表盘 -> 配置向导 -> AI 画布的前端流转，让设计校验时能跑通主路径。
+- 新增 `doc/figma_ui_spec.md`，作为 Figma 设计协作的页面基线与验证清单。
+- 新增 `doc/figma_page_review.md`，把页面级视觉和交互对照拆成可执行验收清单。
+- 在 README 中增加 UI 设计协作入口，方便后续直接对照页面和流转。
+- 在开发笔记中记录当前协作基线，确保设计稿、代码和文档可同步更新。
+
+### 修改意图
+1. 让 UI 设计能围绕真实可跑通的用户流展开，而不是停留在静态展示。
+2. 给 Figma 设计稿提供文档基线，便于你和我逐页核对。
+3. 让后续页面扩张时有明确的对齐锚点。
+4. 把“逐页核对”从口头要求变成文档化清单，便于持续执行。
+
+### 对项目的影响
+1. 设计协作入口清晰化，后续可以直接围绕这份基线迭代 Figma。
+2. 代码与文档的用户流描述更一致，减少“画出来但跑不通”的偏差。
+3. 仍保留旧的 5 页 / 8 阶段产品语义，避免丢失长期规划。
+
+## 2026-03-24 重写项目总报告为 Web 工作台版
+
+### 涉及文件
+1. `doc/AI_Game_Forge_Report.md`
+2. `doc/web_ux_review.md`
+3. `notes.txt`
+
+### 核心 Diff 摘要
+- 将项目总报告从旧版 8 步流程改写为 Web 工作台版总览。
+- 总报告与 Web UX 核对文档保持同一套 5 页面 / 8 阶段定义。
+- 补充对象模型、Unity 自动对接、交互原则和落地节奏。
+
+### 修改意图
+1. 避免核心报告继续传播旧的 8 步表单模型。
+2. 让总报告可以直接作为产品总览和对齐基线。
+3. 为前端工作台重构提供一致的文档入口。
+
+### 对项目的影响
+1. 产品叙述统一到 5 页工作台。
+2. 页面的显示、布局与验证设计有了总览和细化两层文档。
+3. 后续实现可以直接按新报告推进。
+
+## 2026-03-24 新增 Web 用户体验核对文档
+
+### 涉及文件
+1. `doc/web_ux_review.md`
+2. `notes.txt`
+
+### 核心 Diff 摘要
+- 新增 Web 用户体验与页面布局核对文档。
+- 文档包含 5 个页面的布局骨架、用户行为、系统反馈和验证设计。
+- 补充了全局 Web 壳、用户路径核对与体验原则。
+
+### 修改意图
+1. 用 Markdown 明确页面显示与交互体验，而不是只做口头说明。
+2. 让团队可以直接核对“用户看到什么、点什么、系统怎么反馈”。
+3. 为后续 UI 实现提供更清晰的页面级参考。
+
+### 对项目的影响
+1. Web 页面设计有了可审阅的文字版和图示版。
+2. 用户行为、反馈与验证点变得可检查。
+3. 该文档可作为前端工作台重构的体验基线。
 
 ## 2026-03-24 补充落地节奏与实施顺序
 

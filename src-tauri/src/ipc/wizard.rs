@@ -1,11 +1,11 @@
-﻿//! Wizard 持久化 IPC 接口
+//! Wizard 持久化 IPC 接口
 //! 将 WizardState 写入 SQLite 并支持加载最近记录
 
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
 use diesel::sql_types::Text;
-use diesel::{RunQueryDsl, QueryableByName};
+use diesel::{QueryableByName, RunQueryDsl};
 
 use crate::database;
 
@@ -52,8 +52,8 @@ pub async fn save_wizard_state(
     let wizard_state = serde_json::to_string(&payload.wizard_state)
         .map_err(|err| format!("序列化失败: {}", err))?;
 
-    let mut conn = database::get_connection(&app_handle)
-        .map_err(|err| format!("数据库连接失败: {}", err))?;
+    let mut conn =
+        database::get_connection(&app_handle).map_err(|err| format!("数据库连接失败: {}", err))?;
 
     let sql = r#"
         INSERT INTO wizard_states (project_root, wizard_state, updated_at)
@@ -80,8 +80,8 @@ pub async fn save_wizard_state(
 pub async fn load_latest_wizard_state(
     app_handle: AppHandle,
 ) -> Result<Option<WizardStateRecord>, String> {
-    let mut conn = database::get_connection(&app_handle)
-        .map_err(|err| format!("数据库连接失败: {}", err))?;
+    let mut conn =
+        database::get_connection(&app_handle).map_err(|err| format!("数据库连接失败: {}", err))?;
 
     let sql = r#"
         SELECT project_root, wizard_state, updated_at
@@ -99,8 +99,8 @@ pub async fn load_latest_wizard_state(
     }
 
     let row = &rows[0];
-    let wizard_state: serde_json::Value = serde_json::from_str(&row.wizard_state)
-        .map_err(|err| format!("解析失败: {}", err))?;
+    let wizard_state: serde_json::Value =
+        serde_json::from_str(&row.wizard_state).map_err(|err| format!("解析失败: {}", err))?;
 
     Ok(Some(WizardStateRecord {
         project_root: row.project_root.clone(),
@@ -124,8 +124,8 @@ pub async fn load_wizard_state_by_project(
         return Err("项目路径不能为空".to_string());
     }
 
-    let mut conn = database::get_connection(&app_handle)
-        .map_err(|err| format!("数据库连接失败: {}", err))?;
+    let mut conn =
+        database::get_connection(&app_handle).map_err(|err| format!("数据库连接失败: {}", err))?;
 
     let sql = r#"
         SELECT project_root, wizard_state, updated_at
@@ -144,8 +144,8 @@ pub async fn load_wizard_state_by_project(
     }
 
     let row = &rows[0];
-    let wizard_state: serde_json::Value = serde_json::from_str(&row.wizard_state)
-        .map_err(|err| format!("解析失败: {}", err))?;
+    let wizard_state: serde_json::Value =
+        serde_json::from_str(&row.wizard_state).map_err(|err| format!("解析失败: {}", err))?;
 
     Ok(Some(WizardStateRecord {
         project_root: row.project_root.clone(),

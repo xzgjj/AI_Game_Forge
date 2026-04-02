@@ -1,9 +1,9 @@
 //! 智谱AI提供商实现
 
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 
-use super::{AIProvider, AIGenerationRequest, AIGenerationResponse, ProviderConfig, ProviderStats};
+use super::{AIGenerationRequest, AIGenerationResponse, AIProvider, ProviderConfig, ProviderStats};
 
 /// 智谱AI提供商
 pub struct ZhipuAIProvider {

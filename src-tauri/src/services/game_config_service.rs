@@ -14,3 +14,9 @@ impl GameConfigService {
         Self {}
     }
 }
+
+impl Default for GameConfigService {
+    fn default() -> Self {
+        Self::new()
+    }
+}

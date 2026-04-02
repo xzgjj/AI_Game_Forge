@@ -53,10 +53,7 @@ pub struct AuthResponse {
 /// - 成功: `AuthResponse` 包含用户信息和令牌
 /// - 失败: 错误信息字符串
 #[tauri::command]
-pub async fn login(
-    app_handle: AppHandle,
-    request: LoginRequest,
-) -> Result<AuthResponse, String> {
+pub async fn login(app_handle: AppHandle, request: LoginRequest) -> Result<AuthResponse, String> {
     log::info!("Login attempt with method: {:?}", request.method);
 
     // TODO: 实现具体认证逻辑
@@ -119,10 +116,7 @@ pub async fn register_email(
 /// - 成功: `UserInfo` 用户信息
 /// - 失败: 错误信息字符串
 #[tauri::command]
-pub async fn validate_session(
-    app_handle: AppHandle,
-    token: String,
-) -> Result<UserInfo, String> {
+pub async fn validate_session(app_handle: AppHandle, token: String) -> Result<UserInfo, String> {
     log::debug!("Validating session token");
 
     // TODO: 实现会话验证逻辑
@@ -139,9 +133,7 @@ pub async fn validate_session(
 /// - 成功: `UserInfo` 用户信息
 /// - 失败: 错误信息字符串
 #[tauri::command]
-pub async fn get_current_user(
-    app_handle: AppHandle,
-) -> Result<UserInfo, String> {
+pub async fn get_current_user(app_handle: AppHandle) -> Result<UserInfo, String> {
     log::debug!("Getting current user");
 
     // TODO: 从当前会话获取用户信息

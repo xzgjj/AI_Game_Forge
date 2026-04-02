@@ -1,9 +1,9 @@
 //! 提供商管理器模块
 //! 管理AI提供商的注册、发现和健康检查
 
+use anyhow::Result;
 use std::collections::HashMap;
 use std::sync::Arc;
-use anyhow::Result;
 
 use crate::providers::AIProvider;
 
@@ -40,5 +40,11 @@ impl ProviderManager {
         }
 
         results
+    }
+}
+
+impl Default for ProviderManager {
+    fn default() -> Self {
+        Self::new()
     }
 }

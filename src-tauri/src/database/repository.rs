@@ -1,9 +1,9 @@
 //! 仓储模块
 //! 定义数据访问层接口和实现
 
-use std::sync::Arc;
 use anyhow::Result;
 use diesel::prelude::*;
+use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::database::{ConnectionPool, PooledConnection};
@@ -30,7 +30,9 @@ impl UserRepository {
     }
 
     pub fn get_connection(&self) -> Result<PooledConnection> {
-        self.pool.get().map_err(|e| anyhow::anyhow!("Failed to get connection: {}", e))
+        self.pool
+            .get()
+            .map_err(|e| anyhow::anyhow!("Failed to get connection: {}", e))
     }
 }
 
