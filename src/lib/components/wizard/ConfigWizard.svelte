@@ -518,7 +518,7 @@
           </label>
           <label class="full">
             核心循环
-            <textarea bind:value={coreLoop} rows="3" placeholder="探索 -> 战斗 -> 收集 -> 强化 -> 探索" />
+            <textarea bind:value={coreLoop} rows="3" placeholder="探索 -> 战斗 -> 收集 -> 强化 -> 探索"></textarea>
           </label>
           <label>
             叙事风格
@@ -556,26 +556,26 @@
           </label>
           <label class="full">
             规模与边界
-            <textarea bind:value={scopeNotes} rows="3" placeholder="例如：可玩时长 20 分钟，单场景" />
+            <textarea bind:value={scopeNotes} rows="3" placeholder="例如：可玩时长 20 分钟，单场景"></textarea>
           </label>
         </div>
       {:else if currentStep.id === 'architecture'}
         <div class="form-grid">
           <label class="full">
             系统拆分清单
-            <textarea bind:value={systemModules} rows="3" placeholder="角色控制、敌人AI、碰撞、状态机、关卡系统..." />
+            <textarea bind:value={systemModules} rows="3" placeholder="角色控制、敌人AI、碰撞、状态机、关卡系统..."></textarea>
           </label>
           <label class="full">
             Script 结构设计
-            <textarea bind:value={scriptStructure} rows="3" placeholder="例如：Core/AI/Combat/UI/Systems" />
+            <textarea bind:value={scriptStructure} rows="3" placeholder="例如：Core/AI/Combat/UI/Systems"></textarea>
           </label>
           <label class="full">
             状态机说明
-            <textarea bind:value={stateMachineNotes} rows="3" placeholder="角色/敌人状态切换规则" />
+            <textarea bind:value={stateMachineNotes} rows="3" placeholder="角色/敌人状态切换规则"></textarea>
           </label>
           <label class="full">
             数据流说明
-            <textarea bind:value={dataFlowNotes} rows="3" placeholder="输入 -> 状态 -> 事件 -> UI" />
+            <textarea bind:value={dataFlowNotes} rows="3" placeholder="输入 -> 状态 -> 事件 -> UI"></textarea>
           </label>
         </div>
       {:else if currentStep.id === 'unity-init'}
@@ -680,7 +680,7 @@
           </label>
           <label class="full">
             脚本补充说明
-            <textarea bind:value={scriptNotes} rows="3" placeholder="输入限制、代码规范、接口习惯" />
+            <textarea bind:value={scriptNotes} rows="3" placeholder="输入限制、代码规范、接口习惯"></textarea>
           </label>
           <label class="full">
             Unity Editor 路径（BatchMode 校验）
@@ -735,7 +735,7 @@
           </label>
           <label class="full">
             敌人原型描述
-            <textarea bind:value={enemyArchetypes} rows="3" placeholder="巡逻兵、远程法师、重装怪等" />
+            <textarea bind:value={enemyArchetypes} rows="3" placeholder="巡逻兵、远程法师、重装怪等"></textarea>
           </label>
           <label>
             动画风格
@@ -770,26 +770,26 @@
           </label>
           <label class="full">
             资源补充说明
-            <textarea bind:value={assetNotes} rows="3" placeholder="资源命名、分辨率、色彩约束" />
+            <textarea bind:value={assetNotes} rows="3" placeholder="资源命名、分辨率、色彩约束"></textarea>
           </label>
         </div>
       {:else if currentStep.id === 'iteration'}
         <div class="form-grid">
           <label class="full">
             本次迭代目标
-            <textarea bind:value={iterationGoals} rows="3" placeholder="例如：优化战斗节奏、提高掉落率" />
+            <textarea bind:value={iterationGoals} rows="3" placeholder="例如：优化战斗节奏、提高掉落率"></textarea>
           </label>
           <label class="full">
             数值平衡目标
-            <textarea bind:value={balanceTargets} rows="3" placeholder="例如：Boss 战 3 分钟内结束" />
+            <textarea bind:value={balanceTargets} rows="3" placeholder="例如：Boss 战 3 分钟内结束"></textarea>
           </label>
           <label class="full">
             技能调整
-            <textarea bind:value={skillAdjustments} rows="3" placeholder="技能冷却、伤害系数调整" />
+            <textarea bind:value={skillAdjustments} rows="3" placeholder="技能冷却、伤害系数调整"></textarea>
           </label>
           <label class="full">
             试玩反馈
-            <textarea bind:value={playtestNotes} rows="3" placeholder="记录玩家反馈" />
+            <textarea bind:value={playtestNotes} rows="3" placeholder="记录玩家反馈"></textarea>
           </label>
         </div>
       {:else if currentStep.id === 'release'}
@@ -814,11 +814,11 @@
           </label>
           <label class="full">
             发布说明
-            <textarea bind:value={releaseNotes} rows="3" placeholder="版本亮点、已知问题" />
+            <textarea bind:value={releaseNotes} rows="3" placeholder="版本亮点、已知问题"></textarea>
           </label>
           <label class="full">
             QA 检查清单
-            <textarea bind:value={qaChecklist} rows="3" placeholder="启动、加载、战斗、保存、崩溃监控" />
+            <textarea bind:value={qaChecklist} rows="3" placeholder="启动、加载、战斗、保存、崩溃监控"></textarea>
           </label>
         </div>
       {/if}

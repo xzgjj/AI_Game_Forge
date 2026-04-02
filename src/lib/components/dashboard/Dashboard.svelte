@@ -48,7 +48,7 @@
         </article>
       </section>
     {:else if activeTab === 'projects'}
-      <ProjectManager />
+      <ProjectManager on:open={() => goTo('wizard')} />
     {:else if activeTab === 'settings'}
       <UserSettings />
     {:else if activeTab === 'stats'}
