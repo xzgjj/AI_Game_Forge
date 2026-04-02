@@ -1,63 +1,63 @@
 //! 游戏配置模型
 //! 定义游戏规格数据结构和相关功能
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// 游戏类型
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum GameType {
-    Rpg,        // RPG游戏
-    Adventure,  // 冒险游戏
-    Puzzle,     // 解谜游戏
-    Simulation, // 模拟游戏
-    Strategy,   // 策略游戏
-    Action,     // 动作游戏
-    Sports,     // 体育游戏
-    Racing,     // 竞速游戏
-    Fighting,   // 格斗游戏
-    Horror,     // 恐怖游戏
+    Rpg,           // RPG游戏
+    Adventure,     // 冒险游戏
+    Puzzle,        // 解谜游戏
+    Simulation,    // 模拟游戏
+    Strategy,      // 策略游戏
+    Action,        // 动作游戏
+    Sports,        // 体育游戏
+    Racing,        // 竞速游戏
+    Fighting,      // 格斗游戏
+    Horror,        // 恐怖游戏
     Other(String), // 其他类型
 }
 
 /// 美术风格
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ArtStyle {
-    Pixel,      // 像素风格
-    HandDrawn,  // 手绘风格
-    Cartoon3D,  // 3D卡通风格
-    Realistic,  // 写实风格
-    Anime,      // 动漫风格
-    LowPoly,    // 低多边形风格
-    Stylized,   // 风格化
-    Retro,      // 复古风格
+    Pixel,         // 像素风格
+    HandDrawn,     // 手绘风格
+    Cartoon3D,     // 3D卡通风格
+    Realistic,     // 写实风格
+    Anime,         // 动漫风格
+    LowPoly,       // 低多边形风格
+    Stylized,      // 风格化
+    Retro,         // 复古风格
     Other(String), // 其他风格
 }
 
 /// 叙事风格
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum NarrativeStyle {
-    Lighthearted, // 轻松幽默
-    Epic,         // 史诗壮丽
-    Suspenseful,  // 悬疑紧张
-    Romantic,     // 浪漫爱情
-    Dark,         // 黑暗风格
-    Comedic,      // 喜剧风格
-    Dramatic,     // 戏剧性
-    Educational,  // 教育性
+    Lighthearted,  // 轻松幽默
+    Epic,          // 史诗壮丽
+    Suspenseful,   // 悬疑紧张
+    Romantic,      // 浪漫爱情
+    Dark,          // 黑暗风格
+    Comedic,       // 喜剧风格
+    Dramatic,      // 戏剧性
+    Educational,   // 教育性
     Other(String), // 其他风格
 }
 
 /// 目标平台
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TargetPlatform {
-    Pc,         // PC平台
-    Mobile,     // 移动平台
-    Console,    // 主机平台
-    Web,        // Web平台
+    Pc,            // PC平台
+    Mobile,        // 移动平台
+    Console,       // 主机平台
+    Web,           // Web平台
     MultiPlatform, // 多平台
-    VrAr,       // VR/AR平台
+    VrAr,          // VR/AR平台
 }
 
 /// 年龄分级

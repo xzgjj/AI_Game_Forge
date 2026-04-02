@@ -1,37 +1,37 @@
 //! 认证会话模型
 //! 定义用户会话数据结构和相关功能
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// 认证方法
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum AuthMethod {
-    Wechat,     // 微信扫码
-    Phone,      // 手机验证
-    Email,      // 邮箱密码
-    Github,     // GitHub OAuth
-    Google,     // Google OAuth
-    Local,      // 本地账户
+    Wechat, // 微信扫码
+    Phone,  // 手机验证
+    Email,  // 邮箱密码
+    Github, // GitHub OAuth
+    Google, // Google OAuth
+    Local,  // 本地账户
 }
 
 /// 会话状态
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum SessionStatus {
-    Active,     // 活跃
-    Expired,    // 已过期
-    Revoked,    // 已撤销
-    Invalid,    // 无效
+    Active,  // 活跃
+    Expired, // 已过期
+    Revoked, // 已撤销
+    Invalid, // 无效
 }
 
 /// 设备类型
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum DeviceType {
-    Desktop,    // 桌面设备
-    Mobile,     // 移动设备
-    Tablet,     // 平板设备
-    Unknown,    // 未知设备
+    Desktop, // 桌面设备
+    Mobile,  // 移动设备
+    Tablet,  // 平板设备
+    Unknown, // 未知设备
 }
 
 /// 认证会话模型
@@ -57,6 +57,7 @@ pub struct AuthSession {
 
 impl AuthSession {
     /// 创建新会话
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         user_id: Uuid,
         auth_method: AuthMethod,
@@ -107,7 +108,12 @@ impl AuthSession {
     }
 
     /// 刷新会话
-    pub fn refresh(&mut self, new_token: String, new_refresh_token: Option<String>, expires_in_hours: u32) {
+    pub fn refresh(
+        &mut self,
+        new_token: String,
+        new_refresh_token: Option<String>,
+        expires_in_hours: u32,
+    ) {
         let now = Utc::now();
         let new_expires_at = now + chrono::Duration::hours(expires_in_hours as i64);
 

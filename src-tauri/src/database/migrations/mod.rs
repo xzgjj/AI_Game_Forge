@@ -1,9 +1,9 @@
 //! 数据库迁移模块
 //! 处理数据库版本升级和数据迁移
 
+use anyhow::Result;
 use diesel::sqlite::SqliteConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use anyhow::Result;
 use log::info;
 
 /// 嵌入的数据库迁移
@@ -43,10 +43,10 @@ pub fn current_version(conn: &mut SqliteConnection) -> Result<String> {
 
 /// 检查是否有挂起的迁移
 pub fn has_pending_migrations(conn: &mut SqliteConnection) -> Result<bool> {
-    let pending = conn
+    let pending = !conn
         .pending_migrations(MIGRATIONS)
         .map_err(|e| anyhow::anyhow!("Failed to check pending migrations: {}", e))?
-        .len() > 0;
+        .is_empty();
 
     Ok(pending)
 }

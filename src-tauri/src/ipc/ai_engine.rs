@@ -8,12 +8,12 @@ use uuid::Uuid;
 /// 生成内容类型
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ContentType {
-    Character,   // 角色设计
-    Scene,       // 场景描述
-    Dialogue,    // 对话台词
-    Item,        // 物品描述
-    Quest,       // 任务设计
-    Mechanism,   // 机制设计
+    Character,     // 角色设计
+    Scene,         // 场景描述
+    Dialogue,      // 对话台词
+    Item,          // 物品描述
+    Quest,         // 任务设计
+    Mechanism,     // 机制设计
     Other(String), // 其他类型
 }
 
@@ -101,9 +101,7 @@ pub async fn get_generation_history(
 
 /// 获取AI提供商状态接口
 #[tauri::command]
-pub async fn get_provider_status(
-    app_handle: AppHandle,
-) -> Result<serde_json::Value, String> {
+pub async fn get_provider_status(app_handle: AppHandle) -> Result<serde_json::Value, String> {
     log::debug!("Getting AI provider status");
 
     // TODO: 实现提供商状态检查

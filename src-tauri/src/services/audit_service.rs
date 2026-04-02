@@ -14,3 +14,9 @@ impl AuditService {
         Self {}
     }
 }
+
+impl Default for AuditService {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -8,44 +8,44 @@ use uuid::Uuid;
 /// 游戏类型枚举
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum GameType {
-    Rpg,        // RPG游戏
-    Adventure,  // 冒险游戏
-    Puzzle,     // 解谜游戏
-    Simulation, // 模拟游戏
-    Strategy,   // 策略游戏
-    Action,     // 动作游戏
+    Rpg,           // RPG游戏
+    Adventure,     // 冒险游戏
+    Puzzle,        // 解谜游戏
+    Simulation,    // 模拟游戏
+    Strategy,      // 策略游戏
+    Action,        // 动作游戏
     Other(String), // 其他类型
 }
 
 /// 美术风格枚举
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ArtStyle {
-    Pixel,      // 像素风格
-    HandDrawn,  // 手绘风格
-    Cartoon3D,  // 3D卡通风格
-    Realistic,  // 写实风格
-    Anime,      // 动漫风格
+    Pixel,         // 像素风格
+    HandDrawn,     // 手绘风格
+    Cartoon3D,     // 3D卡通风格
+    Realistic,     // 写实风格
+    Anime,         // 动漫风格
     Other(String), // 其他风格
 }
 
 /// 叙事风格枚举
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum NarrativeStyle {
-    Lighthearted, // 轻松幽默
-    Epic,         // 史诗壮丽
-    Suspenseful,  // 悬疑紧张
-    Romantic,     // 浪漫爱情
-    Dark,         // 黑暗风格
+    Lighthearted,  // 轻松幽默
+    Epic,          // 史诗壮丽
+    Suspenseful,   // 悬疑紧张
+    Romantic,      // 浪漫爱情
+    Dark,          // 黑暗风格
     Other(String), // 其他风格
 }
 
 /// 目标平台枚举
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TargetPlatform {
-    Pc,         // PC平台
-    Mobile,     // 移动平台
-    Console,    // 主机平台
-    Web,        // Web平台
+    Pc,            // PC平台
+    Mobile,        // 移动平台
+    Console,       // 主机平台
+    Web,           // Web平台
     MultiPlatform, // 多平台
 }
 
@@ -97,10 +97,7 @@ pub async fn update_game_config(
 
 /// 获取游戏配置接口
 #[tauri::command]
-pub async fn get_game_config(
-    app_handle: AppHandle,
-    config_id: Uuid,
-) -> Result<GameConfig, String> {
+pub async fn get_game_config(app_handle: AppHandle, config_id: Uuid) -> Result<GameConfig, String> {
     log::debug!("Getting game config: {}", config_id);
 
     // TODO: 实现查询逻辑

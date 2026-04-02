@@ -1,17 +1,18 @@
 //! API统计模型
 //! 定义API使用统计和成本分析数据结构
 
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc, NaiveDate};
 
 /// 统计时间段（用于IPC接口）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum StatsPeriod {
-    Day,       // 日统计
-    Week,      // 周统计
-    Month,     // 月统计
-    Custom {   // 自定义时间段
+    Day,   // 日统计
+    Week,  // 周统计
+    Month, // 月统计
+    Custom {
+        // 自定义时间段
         start: DateTime<Utc>,
         end: DateTime<Utc>,
     },
@@ -20,9 +21,9 @@ pub enum StatsPeriod {
 /// 告警级别（用于IPC接口）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AlertLevel {
-    Info,     // 信息
-    Warning,  // 警告
-    Danger,   // 危险
+    Info,    // 信息
+    Warning, // 警告
+    Danger,  // 危险
 }
 
 /// 提供商统计（用于IPC接口）
@@ -99,12 +100,7 @@ pub struct APIStatRecord {
 
 impl APIStatRecord {
     /// 创建新的统计记录
-    pub fn new(
-        user_id: Uuid,
-        provider_name: String,
-        endpoint: String,
-        date: NaiveDate,
-    ) -> Self {
+    pub fn new(user_id: Uuid, provider_name: String, endpoint: String, date: NaiveDate) -> Self {
         let now = Utc::now();
 
         Self {
@@ -222,7 +218,7 @@ pub struct BudgetConfig {
     pub monthly_limit: f64,
     pub currency: String,
     pub alert_thresholds: Vec<f64>, // 例如[0.5, 0.8, 0.95]
-    pub reset_day: u32, // 每月几号重置（1-31）
+    pub reset_day: u32,             // 每月几号重置（1-31）
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -230,10 +226,10 @@ pub struct BudgetConfig {
 /// 预算范围
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum BudgetScope {
-    Global,     // 全局预算
-    Provider,   // 按提供商
-    Project,    // 按项目
-    Category,   // 按类别
+    Global,   // 全局预算
+    Provider, // 按提供商
+    Project,  // 按项目
+    Category, // 按类别
 }
 
 impl BudgetConfig {
@@ -389,7 +385,7 @@ pub enum RecommendationPriority {
 /// 实施难度
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ImplementationEffort {
-    Low,     // 低，配置调整
-    Medium,  // 中，代码修改
-    High,    // 高，架构调整
+    Low,    // 低，配置调整
+    Medium, // 中，代码修改
+    High,   // 高，架构调整
 }

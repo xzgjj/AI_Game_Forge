@@ -1,9 +1,9 @@
 //! AI日志模型
 //! 定义AI调用日志数据结构和相关功能
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// 生成状态
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

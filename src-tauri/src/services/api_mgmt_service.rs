@@ -1,14 +1,14 @@
 //! API管理服务模块
 //! 处理多AI提供商的管理、智能路由、成本统计等
 
+use anyhow::{anyhow, Result};
+use chrono::{Duration, Utc};
+use serde_json::Value;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, RwLock};
-use anyhow::{Result, anyhow};
-use chrono::{Utc, Duration};
-use serde_json::Value;
 
-use crate::providers::{AIProvider, AIGenerationRequest, AIGenerationResponse};
 use crate::models::api_stats::*;
+use crate::providers::{AIGenerationRequest, AIGenerationResponse, AIProvider};
 
 /// AI提供商统计
 #[derive(Debug, Clone)]
@@ -104,10 +104,7 @@ impl APIManagementService {
     }
 
     /// 智能路由请求
-    pub async fn smart_route(
-        &self,
-        request: AIGenerationRequest,
-    ) -> Result<AIGenerationResponse> {
+    pub async fn smart_route(&self, request: AIGenerationRequest) -> Result<AIGenerationResponse> {
         log::debug!("Smart routing request: {:?}", request.content_type);
 
         let provider_name = self.select_provider(&request).await?;
@@ -120,15 +117,12 @@ impl APIManagementService {
     async fn select_provider(&self, request: &AIGenerationRequest) -> Result<String> {
         let strategy = self.routing_strategy.read().unwrap().clone();
 
-        match strategy {
-            RoutingStrategy::Manual(ref provider) => {
-                if self.providers.contains_key(provider.as_str()) {
-                    return Ok(provider.clone());
-                } else {
-                    log::warn!("Manual provider {} not available, falling back", provider);
-                }
+        if let RoutingStrategy::Manual(ref provider) = strategy {
+            if self.providers.contains_key(provider.as_str()) {
+                return Ok(provider.clone());
             }
-            _ => {} // 其他策略继续处理
+
+            log::warn!("Manual provider {} not available, falling back", provider);
         }
 
         if !self.config.enable_smart_routing {
@@ -146,7 +140,9 @@ impl APIManagementService {
         match strategy {
             RoutingStrategy::CostFirst => self.select_cost_first(&available_providers),
             RoutingStrategy::SpeedFirst => self.select_speed_first(&available_providers),
-            RoutingStrategy::QualityFirst => self.select_quality_first(&available_providers, request),
+            RoutingStrategy::QualityFirst => {
+                self.select_quality_first(&available_providers, request)
+            }
             RoutingStrategy::Balanced => self.select_balanced(&available_providers, request),
             _ => Ok(self.config.default_provider.clone()),
         }
@@ -159,7 +155,9 @@ impl APIManagementService {
         providers
             .iter()
             .filter_map(|name| {
-                stats.get(name).map(|stat| (name, stat.total_cost / stat.total_requests.max(1) as f64))
+                stats
+                    .get(name)
+                    .map(|stat| (name, stat.total_cost / stat.total_requests.max(1) as f64))
             })
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(name, _)| name.clone())
@@ -173,7 +171,9 @@ impl APIManagementService {
         providers
             .iter()
             .filter_map(|name| {
-                stats.get(name).map(|stat| (name, stat.avg_response_time_ms))
+                stats
+                    .get(name)
+                    .map(|stat| (name, stat.avg_response_time_ms))
             })
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(name, _)| name.clone())
@@ -181,16 +181,25 @@ impl APIManagementService {
     }
 
     /// 质量优先选择（根据请求类型）
-    fn select_quality_first(&self, providers: &[String], _request: &AIGenerationRequest) -> Result<String> {
+    fn select_quality_first(
+        &self,
+        providers: &[String],
+        _request: &AIGenerationRequest,
+    ) -> Result<String> {
         // TODO: 根据请求类型和历史成功率选择
         // 目前先返回第一个可用提供商
-        providers.first()
+        providers
+            .first()
             .cloned()
             .ok_or_else(|| anyhow!("没有可用的提供商"))
     }
 
     /// 平衡选择
-    fn select_balanced(&self, providers: &[String], _request: &AIGenerationRequest) -> Result<String> {
+    fn select_balanced(
+        &self,
+        providers: &[String],
+        _request: &AIGenerationRequest,
+    ) -> Result<String> {
         // TODO: 实现综合评分算法
         // 考虑成本、速度、质量、使用频率等因素
         Ok(self.config.default_provider.clone())
@@ -208,7 +217,9 @@ impl APIManagementService {
         self.check_budget(&provider_name, &request).await?;
 
         // 获取提供商
-        let provider = self.providers.get(&provider_name)
+        let provider = self
+            .providers
+            .get(&provider_name)
             .ok_or_else(|| anyhow!("提供商不存在: {}", provider_name))?;
 
         // 执行请求
@@ -224,7 +235,11 @@ impl APIManagementService {
     }
 
     /// 检查预算
-    async fn check_budget(&self, provider_name: &str, _request: &AIGenerationRequest) -> Result<()> {
+    async fn check_budget(
+        &self,
+        provider_name: &str,
+        _request: &AIGenerationRequest,
+    ) -> Result<()> {
         let budgets = self.budgets.read().unwrap();
 
         // 检查全局预算
@@ -235,7 +250,7 @@ impl APIManagementService {
         }
 
         // 检查提供商特定预算
-        if let Some(provider_budget) = budgets.iter().find(|b| &b.provider_name == provider_name) {
+        if let Some(provider_budget) = budgets.iter().find(|b| b.provider_name == provider_name) {
             if provider_budget.current_month_spent >= provider_budget.monthly_limit {
                 return Err(anyhow!("提供商 {} 的预算已用完", provider_name));
             }
@@ -256,9 +271,10 @@ impl APIManagementService {
         if let Some(provider_stats) = stats.get_mut(provider_name) {
             provider_stats.total_requests += 1;
             provider_stats.last_used = Utc::now();
-            provider_stats.avg_response_time_ms =
-                (provider_stats.avg_response_time_ms * (provider_stats.total_requests - 1) as f64
-                 + duration.num_milliseconds() as f64) / provider_stats.total_requests as f64;
+            provider_stats.avg_response_time_ms = (provider_stats.avg_response_time_ms
+                * (provider_stats.total_requests - 1) as f64
+                + duration.num_milliseconds() as f64)
+                / provider_stats.total_requests as f64;
 
             match result {
                 Ok(response) => {
@@ -269,8 +285,8 @@ impl APIManagementService {
                 }
                 Err(_) => {
                     provider_stats.failed_requests += 1;
-                    provider_stats.error_rate =
-                        provider_stats.failed_requests as f64 / provider_stats.total_requests as f64;
+                    provider_stats.error_rate = provider_stats.failed_requests as f64
+                        / provider_stats.total_requests as f64;
 
                     // 如果错误率过高，标记为不可用
                     if provider_stats.error_rate > 0.3 && provider_stats.total_requests > 10 {
@@ -286,9 +302,11 @@ impl APIManagementService {
     async fn get_available_providers(&self) -> Vec<String> {
         let stats = self.stats.read().unwrap();
 
-        self.providers.keys()
+        self.providers
+            .keys()
             .filter(|name| {
-                stats.get(*name)
+                stats
+                    .get(*name)
                     .map(|stat| stat.is_available)
                     .unwrap_or(false)
             })
@@ -388,19 +406,22 @@ impl APIManagementService {
         let mut status = HashMap::new();
 
         for (name, stat) in stats.iter() {
-            status.insert(name.clone(), serde_json::json!({
-                "available": stat.is_available,
-                "total_requests": stat.total_requests,
-                "success_rate": if stat.total_requests > 0 {
-                    stat.successful_requests as f64 / stat.total_requests as f64
-                } else {
-                    0.0
-                },
-                "avg_response_time_ms": stat.avg_response_time_ms,
-                "total_cost": stat.total_cost,
-                "error_rate": stat.error_rate,
-                "last_used": stat.last_used.to_rfc3339(),
-            }));
+            status.insert(
+                name.clone(),
+                serde_json::json!({
+                    "available": stat.is_available,
+                    "total_requests": stat.total_requests,
+                    "success_rate": if stat.total_requests > 0 {
+                        stat.successful_requests as f64 / stat.total_requests as f64
+                    } else {
+                        0.0
+                    },
+                    "avg_response_time_ms": stat.avg_response_time_ms,
+                    "total_cost": stat.total_cost,
+                    "error_rate": stat.error_rate,
+                    "last_used": stat.last_used.to_rfc3339(),
+                }),
+            );
         }
 
         status

@@ -5,13 +5,13 @@ pub mod migrations;
 pub mod repository;
 pub mod schema;
 
-use std::sync::Arc;
 use anyhow::Result;
-use diesel::sqlite::SqliteConnection;
 use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::sqlite::SqliteConnection;
 use diesel::RunQueryDsl;
-use tauri::{AppHandle, Manager};
 use log::{info, warn};
+use std::sync::Arc;
+use tauri::{AppHandle, Manager};
 
 /// 数据库连接池类型
 pub type ConnectionPool = Pool<ConnectionManager<SqliteConnection>>;
@@ -61,7 +61,9 @@ impl DatabaseManager {
         // 创建连接池
         let pool = Pool::builder()
             .max_size(config.max_connections)
-            .connection_timeout(std::time::Duration::from_secs(config.connection_timeout_secs))
+            .connection_timeout(std::time::Duration::from_secs(
+                config.connection_timeout_secs,
+            ))
             .build(manager)?;
 
         // 测试连接
@@ -76,7 +78,6 @@ impl DatabaseManager {
 
     /// 配置数据库
     fn configure_database(conn: &mut SqliteConnection, config: &DatabaseConfig) -> Result<()> {
-
         // 启用外键约束
         if config.enable_foreign_keys {
             diesel::sql_query("PRAGMA foreign_keys = ON;").execute(conn)?;
@@ -102,7 +103,9 @@ impl DatabaseManager {
 
     /// 获取数据库连接
     pub fn get_connection(&self) -> Result<PooledConnection> {
-        self.pool.get().map_err(|e| anyhow::anyhow!("Failed to get database connection: {}", e))
+        self.pool
+            .get()
+            .map_err(|e| anyhow::anyhow!("Failed to get database connection: {}", e))
     }
 
     /// 运行数据库迁移
@@ -123,8 +126,7 @@ impl DatabaseManager {
         let mut conn = self.get_connection()?;
 
         // 使用SQLite的备份API
-        diesel::sql_query(format!("VACUUM INTO '{}';", backup_path))
-            .execute(&mut conn)?;
+        diesel::sql_query(format!("VACUUM INTO '{}';", backup_path)).execute(&mut conn)?;
 
         info!("Database backup completed");
         Ok(())
@@ -164,7 +166,10 @@ pub fn init(app: &AppHandle) -> Result<()> {
 
     // 获取应用数据目录
     let app_data_dir = app.path().app_data_dir()?;
-    let db_path = app_data_dir.join("gamecraft.db").to_string_lossy().to_string();
+    let db_path = app_data_dir
+        .join("gamecraft.db")
+        .to_string_lossy()
+        .to_string();
 
     // 创建数据库配置
     let config = DatabaseConfig {

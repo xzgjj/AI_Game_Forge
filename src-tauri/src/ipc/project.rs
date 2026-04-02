@@ -8,10 +8,10 @@ use uuid::Uuid;
 /// 项目状态
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ProjectStatus {
-    Draft,      // 草稿
-    Active,     // 活跃
-    Archived,   // 已归档
-    Exported,   // 已导出
+    Draft,    // 草稿
+    Active,   // 活跃
+    Archived, // 已归档
+    Exported, // 已导出
 }
 
 /// 项目信息
@@ -132,7 +132,11 @@ pub async fn delete_project(
     project_id: Uuid,
     permanent: bool,
 ) -> Result<bool, String> {
-    log::info!("Deleting project: {} (permanent: {})", project_id, permanent);
+    log::info!(
+        "Deleting project: {} (permanent: {})",
+        project_id,
+        permanent
+    );
 
     // TODO: 实现项目删除逻辑
 

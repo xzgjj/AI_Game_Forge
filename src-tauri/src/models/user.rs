@@ -1,26 +1,26 @@
 //! 用户模型
 //! 定义用户数据结构和相关功能
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// 用户角色
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum UserRole {
-    Guest,      // 访客
-    User,       // 普通用户
-    Pro,        // 专业用户
-    Admin,      // 管理员
+    Guest, // 访客
+    User,  // 普通用户
+    Pro,   // 专业用户
+    Admin, // 管理员
 }
 
 /// 用户状态
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum UserStatus {
-    Pending,    // 待验证
-    Active,     // 活跃
-    Suspended,  // 已暂停
-    Banned,     // 已封禁
+    Pending,   // 待验证
+    Active,    // 活跃
+    Suspended, // 已暂停
+    Banned,    // 已封禁
 }
 
 /// 用户模型
@@ -44,11 +44,7 @@ pub struct User {
 
 impl User {
     /// 创建新用户
-    pub fn new(
-        username: String,
-        email: Option<String>,
-        phone: Option<String>,
-    ) -> Self {
+    pub fn new(username: String, email: Option<String>, phone: Option<String>) -> Self {
         let now = Utc::now();
 
         Self {

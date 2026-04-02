@@ -7,10 +7,11 @@ use tauri::AppHandle;
 /// 统计时间段
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum StatsPeriod {
-    Day,       // 日统计
-    Week,      // 周统计
-    Month,     // 月统计
-    Custom {   // 自定义时间段
+    Day,   // 日统计
+    Week,  // 周统计
+    Month, // 月统计
+    Custom {
+        // 自定义时间段
         start: chrono::DateTime<chrono::Utc>,
         end: chrono::DateTime<chrono::Utc>,
     },
@@ -61,9 +62,9 @@ pub struct UsageStats {
 /// 告警级别
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum AlertLevel {
-    Info,     // 信息
-    Warning,  // 警告
-    Danger,   // 危险
+    Info,    // 信息
+    Warning, // 警告
+    Danger,  // 危险
 }
 
 /// 预算告警
@@ -138,9 +139,7 @@ pub async fn set_budget_limit(
 /// - 成功: `Vec<BudgetAlert>` 预算告警列表
 /// - 失败: 错误信息字符串
 #[tauri::command]
-pub async fn get_budget_alerts(
-    app_handle: AppHandle,
-) -> Result<Vec<BudgetAlert>, String> {
+pub async fn get_budget_alerts(app_handle: AppHandle) -> Result<Vec<BudgetAlert>, String> {
     log::debug!("Getting budget alerts");
 
     // TODO: 实现告警检查逻辑
@@ -157,9 +156,7 @@ pub async fn get_budget_alerts(
 /// - 成功: `Vec<String>` 提供商名称列表
 /// - 失败: 错误信息字符串
 #[tauri::command]
-pub async fn get_provider_list(
-    app_handle: AppHandle,
-) -> Result<Vec<String>, String> {
+pub async fn get_provider_list(app_handle: AppHandle) -> Result<Vec<String>, String> {
     log::debug!("Getting provider list");
 
     // TODO: 从配置或数据库获取提供商列表

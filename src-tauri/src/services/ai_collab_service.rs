@@ -14,3 +14,9 @@ impl AICollabService {
         Self {}
     }
 }
+
+impl Default for AICollabService {
+    fn default() -> Self {
+        Self::new()
+    }
+}
